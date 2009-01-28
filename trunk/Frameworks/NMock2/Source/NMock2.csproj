@@ -1,0 +1,135 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{79C78732-B34C-4429-B678-C8ADE5FB5BE1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NMock2</RootNamespace>
+    <AssemblyName>NMock2</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>NMock2.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\NMock2.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\NMock2.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Actions\CollectAction.cs" />
+    <Compile Include="Actions\DelegateAction.cs" />
+    <Compile Include="Actions\FireAction.cs" />
+    <Compile Include="Actions\LazyReturnAction.cs" />
+    <Compile Include="Actions\ResultSynthesizer.cs" />
+    <Compile Include="Actions\ReturnAction.cs" />
+    <Compile Include="Actions\ReturnCloneAction.cs" />
+    <Compile Include="Actions\SetIndexedParameterAction.cs" />
+    <Compile Include="Actions\SetNamedParameterAction.cs" />
+    <Compile Include="Actions\SignalAction.cs" />
+    <Compile Include="Actions\ThrowAction.cs" />
+    <Compile Include="Expect.cs" />
+    <Compile Include="Fire.cs" />
+    <Compile Include="Has.cs" />
+    <Compile Include="IAction.cs" />
+    <Compile Include="IExpectation.cs" />
+    <Compile Include="Internal\BuildableExpectation.cs" />
+    <Compile Include="Internal\DescriptionWriter.cs" />
+    <Compile Include="Internal\EventInvocationBuilder.cs" />
+    <Compile Include="Internal\ExpectationBuilder.cs" />
+    <Compile Include="Internal\ExpectationException.cs" />
+    <Compile Include="Internal\IExpectationOrdering.cs" />
+    <Compile Include="Internal\IMockObject.cs" />
+    <Compile Include="Internal\MockObject.cs" />
+    <Compile Include="Internal\OrderedExpectations.cs" />
+    <Compile Include="Internal\UnorderedExpectations.cs" />
+    <Compile Include="Is.cs" />
+    <Compile Include="ISelfDescribing.cs" />
+    <Compile Include="Matcher.cs" />
+    <Compile Include="Matchers\AlwaysMatcher.cs" />
+    <Compile Include="Matchers\AndMatcher.cs" />
+    <Compile Include="Matchers\ArgumentsMatcher.cs" />
+    <Compile Include="Matchers\BinaryOperator.cs" />
+    <Compile Include="Matchers\ComparisonMatcher.cs" />
+    <Compile Include="Matchers\DescriptionOverride.cs" />
+    <Compile Include="Matchers\ElementMatcher.cs" />
+    <Compile Include="Matchers\EqualMatcher.cs" />
+    <Compile Include="Matchers\FieldMatcher.cs" />
+    <Compile Include="Matchers\GenericMethodTypeParametersMatcher.cs" />
+    <Compile Include="Matchers\IndexGetterArgumentsMatcher.cs" />
+    <Compile Include="Matchers\IndexSetterArgumentsMatcher.cs" />
+    <Compile Include="Matchers\MethodNameMatcher.cs" />
+    <Compile Include="Matchers\NotMatcher.cs" />
+    <Compile Include="Matchers\NullMatcher.cs" />
+    <Compile Include="Matchers\OrMatcher.cs" />
+    <Compile Include="Matchers\PropertyMatcher.cs" />
+    <Compile Include="Matchers\SameMatcher.cs" />
+    <Compile Include="Matchers\StringContainsMatcher.cs" />
+    <Compile Include="Matchers\ToStringMatcher.cs" />
+    <Compile Include="Matchers\TypeMatcher.cs" />
+    <Compile Include="Mockery.cs" />
+    <Compile Include="Monitoring\IInvokable.cs" />
+    <Compile Include="Monitoring\Invocation.cs" />
+    <Compile Include="Monitoring\Invoker.cs" />
+    <Compile Include="Monitoring\MockObjectFactory.cs" />
+    <Compile Include="Monitoring\MultiInterfaceFactory.cs" />
+    <Compile Include="Monitoring\ParameterList.cs" />
+    <Compile Include="Monitoring\ProxiedObjectIdentity.cs" />
+    <Compile Include="Monitoring\ProxyInvokableAdapter.cs" />
+    <Compile Include="Return.cs" />
+    <Compile Include="Signal.cs" />
+    <Compile Include="Stub.cs" />
+    <Compile Include="Syntax\IActionSyntax.cs" />
+    <Compile Include="Syntax\IArgumentSyntax.cs" />
+    <Compile Include="Syntax\IEventArgumentSyntax.cs" />
+    <Compile Include="Syntax\IEventSyntax.cs" />
+    <Compile Include="Syntax\ICommentSyntax.cs" />
+    <Compile Include="Syntax\IGetIndexerSyntax.cs" />
+    <Compile Include="Syntax\IMatchSyntax.cs" />
+    <Compile Include="Syntax\IMethodSyntax.cs" />
+    <Compile Include="Syntax\IReceiverSyntax.cs" />
+    <Compile Include="Syntax\ISetIndexerSyntax.cs" />
+    <Compile Include="Syntax\IValueSyntax.cs" />
+    <Compile Include="Throw.cs" />
+    <Compile Include="Verify.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NMock2.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
