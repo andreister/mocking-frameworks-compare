@@ -2,12 +2,25 @@
 
 namespace MockingFrameworksCompare.ShoppingCartSample
 {
-    public class ShoppingCart : IShoppingCart
+    public class ShoppingCart 
     {
         private readonly List<Product> _products = new List<Product>();
+
+        /// <summary>
+        /// 'Red' state of the cart - indicates that something went wrong along the way.
+        /// </summary>
         public virtual bool IsRed { get; set; }
+
+        /// <summary>
+        /// Shopping cart owner.
+        /// </summary>
         public virtual User User { get; set; }
 
+        /// <summary>
+        /// Adds all products with names similar to the given one.
+        /// </summary>
+        /// <param name="name">Rough name of a product we're looking for.</param>
+        /// <param name="warehouse">Wharehouse to get the products from.</param> 
         public virtual void AddProducts(string name, IWarehouse warehouse)
         {
             if (IsRed)
@@ -24,16 +37,24 @@ namespace MockingFrameworksCompare.ShoppingCartSample
             }
         }
 
+        /// <summary>
+        /// Adds all products with names similar to the given one, if warehouse is available.
+        /// </summary>
+        /// <param name="name">Rough name of a product we're looking for.</param>
+        /// <param name="warehouse">Wharehouse to get the products from.</param> 
         public virtual void AddProductsIfWarehouseAvailable(string name, IWarehouse warehouse)
         {
             if (warehouse.IsAvailable)
                 AddProducts(name, warehouse);
         }
 
-        public void Alarm(object sender, WarehouseEventArgs args)
+        /// <summary>
+        /// Returns the number of products in the cart.
+        /// </summary>
+        /// <returns></returns>
+        public virtual int GetProductsCount()
         {
-            if (args.BadRequest)
-                IsRed = true;
+            return _products.Count;
         }
 
         public string ThankYou()
@@ -41,9 +62,10 @@ namespace MockingFrameworksCompare.ShoppingCartSample
             return "Thank you, " + User.ContactDetails.Name;
         }
 
-        public virtual int GetProductsCount()
+        private void Alarm(object sender, WarehouseEventArgs args)
         {
-            return _products.Count;
+            if (args.BadRequest)
+                IsRed = true;
         }
     }
 }
