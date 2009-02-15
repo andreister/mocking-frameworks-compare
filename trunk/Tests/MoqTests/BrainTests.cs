@@ -19,7 +19,7 @@ namespace MoqTests
         {
             var hand = new Mock<IHand>();
             var mouth = new Mock<IMouth>();
-            hand.Setup(x => x.TouchIron(It.Is<Iron>(i => i.IsHot))).Throws(new BurnException());
+            hand.Setup(x => x.TouchIron(HotIron())).Throws(new BurnException());
 
             var brain = new Brain(hand.Object, mouth.Object);
             brain.TouchIron(new Iron { IsHot = true });
@@ -28,14 +28,13 @@ namespace MoqTests
         }
 
         /// <summary>
-        /// A separate property would be really helpful to make the tests less verbose,
-        /// since parameter expectations tend to be quite long in Moq. Unfortunately,
-        /// this approach is not possible.
+        /// Parameter expectations tend to be quite verbose in Moq, so we provide a custom matcher.
+        /// This needs a matcher method and a bool sibling method for evaluating the expectations.
+        /// Calling this matcher is technically equivalent to <code>It.Is{Iron}(i => i.IsHot)</code>.
         /// </summary>
-        private static Iron HotIron
-        {
-            get { return It.Is<Iron>(i => i.IsHot); }
-        }
+        [Matcher]
+        private static Iron HotIron() { return null; }
+        public static bool HotIron(Iron iron) { return iron.IsHot; }
     }
 
 }
