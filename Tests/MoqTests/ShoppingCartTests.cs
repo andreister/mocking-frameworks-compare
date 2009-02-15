@@ -116,7 +116,7 @@ namespace MoqTests
         }
 
         /// <summary>
-        /// You can write code directly in the expectation setup. A separate property is just 
+        /// You can write code directly in the expectation setup. A separate method is just 
         /// to make tests less verbose - since callback expectations tend to be quite long in all mocking frameworks.
         /// (Unfortunately, this can not be done with "It.Is..." constraints of Moq).
         /// </summary>
