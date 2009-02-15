@@ -43,7 +43,7 @@ namespace MoqTests
         public void Test2_MockedEvent()
         {
             var warehouse = new Mock<IWarehouse>();
-            warehouse.Setup(x => x.GetProducts(It.IsAny<string>())).Callback(RaiseBadRequest(warehouse)).Returns(new List<Product>());
+            warehouse.Setup(x => x.GetProducts(Any())).Callback(RaiseBadRequest(warehouse)).Returns(new List<Product>());
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse.Object);
@@ -59,7 +59,7 @@ namespace MoqTests
         {
             var warehouse = new Mock<IWarehouse>();
             warehouse.Setup(x => x.IsAvailable).Returns(false);
-            warehouse.Setup(x => x.GetProducts(It.IsAny<string>())).Never();
+            warehouse.Setup(x => x.GetProducts(Any())).Never();
 
             var cart = new ShoppingCart();
             cart.AddProductsIfWarehouseAvailable("foo", warehouse.Object);
@@ -72,12 +72,12 @@ namespace MoqTests
         public void Test4_MockedArgument()
         {
             var warehouse = new Mock<IWarehouse>();
-            warehouse.Setup(x => x.GetProducts(It.IsAny<string>())).Returns(new List<Product>());
+            warehouse.Setup(x => x.GetProducts(Any())).Returns(new List<Product>());
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse.Object);
 
-            warehouse.Verify(x => x.GetProducts(It.Is<string>(it => it.Equals("foo"))));
+            warehouse.Verify(x => x.GetProducts(Is("foo")));
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace MoqTests
         {
             var warehouse = new Mock<IWarehouse>();
             var cart = new Mock<ShoppingCart> { CallBase = true };
-            warehouse.Setup(x => x.GetProducts(It.IsAny<string>())).Returns(DefaultProducts);
+            warehouse.Setup(x => x.GetProducts(Any())).Returns(DefaultProducts);
             cart.Setup(x => x.IsRed).Returns(true);
 
             cart.Object.AddProducts("foo", warehouse.Object);
@@ -135,5 +135,23 @@ namespace MoqTests
         {
             get { return new List<Product> { new Product("nail", 10), new Product("snail", 5) }; }
         }
+
+        /// <summary>
+        /// Parameter expectations tend to be quite verbose in Moq, so we provide a custom matcher.
+        /// This needs a matcher method and a bool sibling method for evaluating the expectations.
+        /// Calling this matcher is technically equivalent to <code>It.IsAny{string}()</code>.
+        /// </summary>
+        [Matcher]
+        private static string Any() { return null; }
+        public static bool Any(string s) { return true; }
+
+        /// <summary>
+        /// Parameter expectations tend to be quite verbose in Moq, so we provide a custom matcher.
+        /// This needs a matcher method and a bool sibling method for evaluating the expectations.
+        /// Calling this matcher is technically equivalent to <code>It.Is{string}(it => it.Equals("foo"))</code>.
+        /// </summary>
+        [Matcher]
+        private static string Is(string test) { return null; }
+        public static bool Is(string s, string test) { return s.Equals(test); }
     }
 }
