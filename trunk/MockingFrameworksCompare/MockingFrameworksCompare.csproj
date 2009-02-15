@@ -43,7 +43,6 @@
     <Compile Include="BrainSample\Hand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShoppingCartSample\Product.cs" />
-    <Compile Include="ShoppingCartSample\IShoppingCart.cs" />
     <Compile Include="ShoppingCartSample\IWarehouse.cs" />
     <Compile Include="ShoppingCartSample\ShoppingCart.cs" />
     <Compile Include="ShoppingCartSample\User.cs" />
