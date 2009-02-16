@@ -1,0 +1,12 @@
+#summary Suggestions.
+
+= Introduction =
+
+Have you any ideas about evolving the project, feel free to put it here.
+
+
+= Details =
+
+Suggestions I've received so far:
+  * Gerry (Lowry) [http://groups.google.com/group/moqdisc/tree/browse_frm/thread/bb13508b9fb686d5/534d83cbe27914b8?rnum=1&_done=%2Fgroup%2Fmoqdisc%2Fbrowse_frm%2Fthread%2Fbb13508b9fb686d5%3F#doc_47f4ada25fa30b75  suggested] to add samples of legacy mocking
+  * [http://groups.google.com/group/moqdisc/tree/browse_frm/thread/bb13508b9fb686d5/534d83cbe27914b8?rnum=1&_done=%2Fgroup%2Fmoqdisc%2Fbrowse_frm%2Fthread%2Fbb13508b9fb686d5%3F#doc_47f4ada25fa30b75 Gerry (Lowry) suggested] to go beyond C# and add dupe the project in VB and other languages
