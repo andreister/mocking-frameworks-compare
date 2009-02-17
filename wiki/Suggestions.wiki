@@ -6,4 +6,4 @@ _Not sure I like this - the main purpose of the project is to teach newbies how 
   * Gerry (Lowry) [http://groups.google.com/group/moqdisc/tree/browse_frm/thread/bb13508b9fb686d5/534d83cbe27914b8?rnum=1&_done=%2Fgroup%2Fmoqdisc%2Fbrowse_frm%2Fthread%2Fbb13508b9fb686d5%3F#doc_47f4ada25fa30b75  suggested] to go beyond C# and add code in VB and maybe other languages.
 _*Really* cool idea. However, I'm not that strong in other languages to make that part. If
 anyone would volunteer for porting the code to VB, it would be great. Likewise, Cobol.NET or L# or [http://www.dotnetpowered.com/languages.aspx anything else] is highly welcome! :) 
-
+  * Your suggestion :)
