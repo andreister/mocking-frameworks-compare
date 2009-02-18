@@ -9,7 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BE9326E0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moq", "Frameworks\Moq\Source\Moq.csproj", "{1C91AC30-5977-4BE5-BA67-8EB186C03514}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMock2", "Frameworks\NMock2\Source\NMock2.csproj", "{79C78732-B34C-4429-B678-C8ADE5FB5BE1}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rhino.Mocks 3.5", "Frameworks\RhinoMocks\Source\Rhino.Mocks 3.5.csproj", "{1E8FECC7-9E9B-4275-A938-D956F5E5D4F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsolatorTests", "Tests\CS\IsolatorTests\IsolatorTests.csproj", "{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoqTests", "Tests\CS\MoqTests\MoqTests.csproj", "{A9C00984-020E-4D27-9263-5D6CF546EB31}"
 EndProject
@@ -17,13 +21,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMock2Tests", "Tests\CS\NMo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RhinoMocksTests", "Tests\CS\RhinoMocksTests\RhinoMocksTests.csproj", "{95E69837-48BB-42DF-8338-21F1C216C7BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMock2", "Frameworks\NMock2\Source\NMock2.csproj", "{79C78732-B34C-4429-B678-C8ADE5FB5BE1}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CS", "CS", "{19968386-F9E1-4F1A-8F7C-728B807ACCA1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VB", "VB", "{766EB4F4-264C-4C31-9A93-BF9331281FB9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsolatorTests", "Tests\CS\IsolatorTests\IsolatorTests.csproj", "{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "IsolatorTests", "Tests\VB\IsolatorTests\IsolatorTests.vbproj", "{F2B843C2-EF21-4670-B70D-816BCF213F8D}"
 EndProject
