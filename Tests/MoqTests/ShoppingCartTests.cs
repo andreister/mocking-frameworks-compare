@@ -59,10 +59,11 @@ namespace MoqTests
         {
             var warehouse = new Mock<IWarehouse>();
             warehouse.Setup(x => x.IsAvailable).Returns(false);
-            warehouse.Setup(x => x.GetProducts(Any())).Never();
-
+            
             var cart = new ShoppingCart();
             cart.AddProductsIfWarehouseAvailable("foo", warehouse.Object);
+
+            warehouse.Verify(x => x.GetProducts(Any()), Times.Never());
         }
 
         /// <summary>
