@@ -36,5 +36,4 @@ namespace MoqTests
         private static Iron HotIron() { return null; }
         public static bool HotIron(Iron iron) { return iron.IsHot; }
     }
-
 }
