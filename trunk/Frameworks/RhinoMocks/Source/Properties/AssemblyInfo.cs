@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProductAttribute("Rhino.Mocks.Partial")]
 [assembly: AssemblyCopyrightAttribute("Rhino Tools Project, original author or authors")]
 [assembly: AssemblyVersionAttribute("3.5.0.1337")]
-[assembly: AssemblyInformationalVersionAttribute("3.5.0.1928")]
-[assembly: AssemblyFileVersionAttribute("3.5.0.1928")]
+[assembly: AssemblyInformationalVersionAttribute("3.5.0.2041")]
+[assembly: AssemblyFileVersionAttribute("3.5.0.2041")]
 [assembly: AssemblyDelaySignAttribute(false)]
 
