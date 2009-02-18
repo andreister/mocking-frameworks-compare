@@ -51,29 +51,27 @@ namespace Moq
 	/// Implements the actual interception and method invocation for 
 	/// all mocks.
 	/// </summary>
+#if SILVERLIGHT
+	internal class Interceptor : IInterceptor
+#else
 	internal class Interceptor : MarshalByRefObject, IInterceptor
+#endif
 	{
-		MockBehavior behavior;
-		Type targetType;
-		Dictionary<ExpressionKey, IProxyCall> calls = new Dictionary<ExpressionKey, IProxyCall>();
-		List<IProxyCall> orderedCalls = new List<IProxyCall>();
-		Mock mock;
-		List<IInvocation> actualInvocations = new List<IInvocation>();
+		private MockBehavior behavior;
+		private Type targetType;
+		private Dictionary<ExpressionKey, IProxyCall> calls = new Dictionary<ExpressionKey, IProxyCall>();
+		private List<IProxyCall> orderedCalls = new List<IProxyCall>();
+		private List<IInvocation> actualInvocations = new List<IInvocation>();
 
 		public Interceptor(MockBehavior behavior, Type targetType, Mock mock)
 		{
 			this.behavior = behavior;
 			this.targetType = targetType;
-			this.mock = mock;
+			this.Mock = mock;
 		}
 
 		internal IEnumerable<IInvocation> ActualCalls { get { return actualInvocations; } }
-		internal Mock Mock { get { return mock; } }
-
-		/// <summary>
-		/// Used to call back into a caller whenever an event attach/remove is intercepted.
-		/// </summary>
-		internal EventInfoCallback EventCallback { get; set; }
+		internal Mock Mock { get; private set; }
 
 		internal void Verify()
 		{
@@ -89,18 +87,13 @@ namespace Moq
 			VerifyOrThrow(call => !call.IsNever && !call.Invoked);
 		}
 
-		private void VerifyOrThrow(Predicate<IProxyCall> match)
+		private void VerifyOrThrow(Func<IProxyCall, bool> match)
 		{
-			var failures = new List<Expression>();
-			foreach (var call in calls.Values)
-			{
-				if (match(call))
-					failures.Add(call.SetupExpression.PartialMatcherAwareEval());
-			}
+			var failures = calls.Values.Where(match).ToList();
 
 			if (failures.Count > 0)
 			{
-				throw new MockVerificationException(this.targetType, failures);
+				throw new MockVerificationException(failures);
 			}
 		}
 
@@ -111,7 +104,9 @@ namespace Moq
 			var s = expr.ToStringFixed();
 
 			if (kind == ExpectKind.PropertySet)
+			{
 				s = "set::" + s;
+			}
 
 			var constants = new ConstantsVisitor(expr).Values;
 			var key = new ExpressionKey(s, constants);
@@ -133,19 +128,22 @@ namespace Moq
 
 		public void Intercept(IInvocation invocation)
 		{
+			if (FluentMockContext.Current != null)
+				FluentMockContext.Current.Add(this.Mock, invocation);
+
 			// TODO: too many ifs in this method.
 			// see how to refactor with strategies.
 			if (invocation.Method.DeclaringType.IsGenericType &&
 			  invocation.Method.DeclaringType.GetGenericTypeDefinition() == typeof(IMocked<>))
 			{
 				// "Mixin" of IMocked<T>.Mock
-				invocation.ReturnValue = mock;
+				invocation.ReturnValue = this.Mock;
 				return;
 			}
 			else if (invocation.Method.DeclaringType == typeof(IMocked))
 			{
 				// "Mixin" of IMocked.Mock
-				invocation.ReturnValue = mock;
+				invocation.ReturnValue = this.Mock;
 				return;
 			}
 
@@ -155,8 +153,6 @@ namespace Moq
 				var delegateInstance = (Delegate)invocation.Arguments[0];
 				// TODO: validate we can get the event?
 				EventInfo eventInfo = GetEventFromName(invocation.Method.Name.Replace("add_", ""));
-
-				if (EventCallback != null) EventCallback.SetEvent(mock, eventInfo);
 
 				if (delegateInstance != null)
 				{
@@ -168,7 +164,7 @@ namespace Moq
 					}
 					else
 					{
-						mock.AddEventHandler(eventInfo, (Delegate)invocation.Arguments[0]);
+						this.Mock.AddEventHandler(eventInfo, (Delegate)invocation.Arguments[0]);
 					}
 				}
 
@@ -180,8 +176,6 @@ namespace Moq
 				// TODO: validate we can get the event?
 				EventInfo eventInfo = GetEventFromName(invocation.Method.Name.Replace("remove_", ""));
 
-				if (EventCallback != null) EventCallback.SetEvent(mock, eventInfo);
-
 				if (delegateInstance != null)
 				{
 					var mockEvent = delegateInstance.Target as MockedEvent;
@@ -192,15 +186,18 @@ namespace Moq
 					}
 					else
 					{
-						mock.RemoveEventHandler(eventInfo, (Delegate)invocation.Arguments[0]);
+						this.Mock.RemoveEventHandler(eventInfo, (Delegate)invocation.Arguments[0]);
 					}
 				}
 
 				return;
 			}
 
-			// always save to support Verify[expression] pattern.
-			actualInvocations.Add(invocation);
+			// Save to support Verify[expression] pattern, but only if we're 
+			// not running in a fluent invocation context, which is a recorder-like 
+			// mode we use to evaluate delegates by actually running them.
+			if (!FluentMockContext.SkipRecording)
+				actualInvocations.Add(invocation);
 
 			var call = orderedCalls.LastOrDefault(c => c.Matches(invocation));
 
@@ -232,7 +229,7 @@ namespace Moq
 			}
 			else if (invocation.TargetType.IsClass &&
 			  !invocation.Method.IsAbstract
-				&& mock.CallBase)
+				&& this.Mock.CallBase)
 			{
 				// For mocked classes, if the target method was not abstract, 
 				// invoke directly.
@@ -243,12 +240,16 @@ namespace Moq
 			else if (invocation.Method != null && invocation.Method.ReturnType != null &&
 			  invocation.Method.ReturnType != typeof(void))
 			{
-				invocation.ReturnValue = mock.DefaultValueProvider.ProvideDefault(invocation.Method, invocation.Arguments);
-
-				// Event callbacks may need to be set if the returned value is a mock.
-				if (invocation.ReturnValue is IMocked && EventCallback != null)
+				Mock recursiveMock;
+				if (this.Mock.InnerMocks.TryGetValue(invocation.Method, out recursiveMock))
 				{
-					EventCallback.AddInterceptor(((IMocked)invocation.ReturnValue).Mock.Interceptor);
+					invocation.ReturnValue = recursiveMock.Object;
+				}
+				else
+				{
+					invocation.ReturnValue = this.Mock.DefaultValueProvider.ProvideDefault(
+						invocation.Method,
+						invocation.Arguments);
 				}
 			}
 		}
@@ -297,7 +298,11 @@ namespace Moq
 			Type baseType = initialType.BaseType;
 			if (baseType != null)
 				yield return baseType;
+#if SILVERLIGHT
+			foreach (var implementedInterface in Castle.DynamicProxy.SilverlightExtensions.Extensions.FindInterfaces(initialType, new TypeFilter((foo, bar) => true), null))
+#else
 			foreach (var implementedInterface in initialType.FindInterfaces(new TypeFilter((foo, bar) => true), null))
+#endif
 			{
 				yield return implementedInterface;
 			}

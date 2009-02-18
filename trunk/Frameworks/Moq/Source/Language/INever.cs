@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System;
 
 namespace Moq.Language
 {
@@ -23,6 +24,8 @@ namespace Moq.Language
 		/// the invocations are performed, like strict mocks do 
 		/// with unexpected invocations.
 		/// </remarks>
+		[Obsolete("To verify this condition, use the overload to Verify that receives Times.Never().")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		void Never();
 	}
 }

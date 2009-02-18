@@ -40,11 +40,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
-using Castle.Core.Interceptor;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Permissions;
+using System.Text;
+using Castle.Core.Interceptor;
 
 namespace Moq
 {
@@ -65,8 +65,10 @@ namespace Moq
 	/// allow the test to pass.
 	/// </para>
 	/// </remarks>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors", Justification = "It's only initialized internally.")]
+	[SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors", Justification = "It's only initialized internally.")]
+#if !SILVERLIGHT
 	[Serializable]
+#endif
 	public class MockException : Exception
 	{
 		/// <summary>
@@ -78,7 +80,7 @@ namespace Moq
 		{
 			NoSetup,
 			ReturnValueRequired,
-			VerificationFailed, 
+			VerificationFailed,
 			MoreThanOneCall,
 			MoreThanNCalls,
 			SetupNever,
@@ -114,7 +116,7 @@ namespace Moq
 		private static string GetMessage(MockBehavior behavior,
 			IInvocation invocation, string message)
 		{
-			return String.Format(CultureInfo.CurrentCulture, 
+			return String.Format(CultureInfo.CurrentCulture,
 				Properties.Resources.MockExceptionMessage,
 				invocation.Format(),
 				behavior,
@@ -122,6 +124,7 @@ namespace Moq
 			);
 		}
 
+#if !SILVERLIGHT
 		/// <summary>
 		/// Supports the serialization infrastructure.
 		/// </summary>
@@ -148,41 +151,57 @@ namespace Moq
 			base.GetObjectData(info, context);
 			info.AddValue("reason", reason);
 		}
+#endif
 	}
 
 	/// <devdoc>
 	/// Used by the mock factory to accumulate verification 
 	/// failures.
 	/// </devdoc>
+#if !SILVERLIGHT
 	[Serializable]
+#endif
 	internal class MockVerificationException : MockException
 	{
-		Type targetType;
-		List<Expression> failedSetups;
+		List<IProxyCall> failedSetups;
 
-		public MockVerificationException(Type targetType, List<Expression> failedSetups)
-			: base(ExceptionReason.VerificationFailed, GetMessage(targetType, failedSetups))
+		public MockVerificationException(List<IProxyCall> failedSetups)
+			: base(ExceptionReason.VerificationFailed, GetMessage(failedSetups))
 		{
-			this.targetType = targetType;
 			this.failedSetups = failedSetups;
 		}
 
-		private static string GetMessage(Type targetType, List<Expression> failedSetups)
+		private static string GetMessage(List<IProxyCall> failedSetups)
 		{
-			return String.Format(CultureInfo.CurrentCulture, 
-				Properties.Resources.VerficationFailed, GetRawSetups(targetType, failedSetups));
+			return String.Format(CultureInfo.CurrentCulture,
+				Properties.Resources.VerficationFailed, GetRawSetups(failedSetups));
 		}
 
-		private static string GetRawSetups(Type targetType, List<Expression> failedSetups)
+		private static string GetRawSetups(List<IProxyCall> failedSetups)
 		{
-			StringBuilder message = new StringBuilder();
-			string targetTypeName = targetType.Name;
-			foreach (var expr in failedSetups)
+			var message = new StringBuilder();
+			foreach (var setup in failedSetups)
 			{
-				message
-					.Append(targetTypeName)
-					.Append(" ")
-					.AppendLine(expr.ToStringFixed());
+				if (setup.FailMessage != null)
+				{
+					message.Append(setup.FailMessage).Append(": ");
+				}
+
+				var lambda = setup.SetupExpression.PartialMatcherAwareEval().ToLambda();
+				var targetTypeName = lambda.Parameters[0].Type.Name;
+
+				message.Append(targetTypeName).Append(" ").Append(lambda.ToStringFixed());
+
+				if (setup.TestMethod != null)
+				{
+					message.AppendFormat(
+						" ({0}() in {1}: line {2})",
+						setup.TestMethod.Name,
+						setup.FileName,
+						setup.FileLine);
+				}
+
+				message.AppendLine();
 			}
 
 			return message.ToString();
@@ -190,9 +209,10 @@ namespace Moq
 
 		internal string GetRawSetups()
 		{
-			return GetRawSetups(targetType, failedSetups);
+			return GetRawSetups(failedSetups);
 		}
 
+#if !SILVERLIGHT
 		/// <summary>
 		/// Supports the serialization infrastructure.
 		/// </summary>
@@ -202,6 +222,6 @@ namespace Moq
 			: base(info, context)
 		{
 		}
+#endif
 	}
-
 }

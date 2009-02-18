@@ -47,11 +47,55 @@ using Castle.Core.Interceptor;
 using Moq.Language;
 using Moq.Language.Flow;
 using System.Globalization;
+using System.Diagnostics;
+using System.IO;
 
 namespace Moq
 {
-	internal class MethodCall : IProxyCall, ISetup
+	internal class MethodCall<TMock> : MethodCall, ISetup<TMock>
 	{
+		public MethodCall(Mock mock, Expression originalExpression, MethodInfo method, 
+			params Expression[] arguments)
+			: base(mock, originalExpression, method, arguments)
+		{
+		}
+
+#if !SILVERLIGHT
+		public IVerifies Raises(Action<TMock> eventExpression, EventArgs args)
+		{
+			return Raises(eventExpression, () => args);
+		}
+
+		public IVerifies Raises(Action<TMock> eventExpression, Func<EventArgs> func)
+		{
+			return RaisesImpl(eventExpression, func);
+		}
+
+		public IVerifies Raises<T1>(Action<TMock> eventExpression, Func<T1, EventArgs> func)
+		{
+			return RaisesImpl(eventExpression, func);
+		}
+
+		public IVerifies Raises<T1, T2>(Action<TMock> eventExpression, Func<T1, T2, EventArgs> func)
+		{
+			return RaisesImpl(eventExpression, func);
+		}
+
+		public IVerifies Raises<T1, T2, T3>(Action<TMock> eventExpression, Func<T1, T2, T3, EventArgs> func)
+		{
+			return RaisesImpl(eventExpression, func);
+		}
+
+		public IVerifies Raises<T1, T2, T3, T4>(Action<TMock> eventExpression, Func<T1, T2, T3, T4, EventArgs> func)
+		{
+			return RaisesImpl(eventExpression, func);
+		}
+#endif
+	}
+
+	internal class MethodCall : IProxyCall, ICallbackResult, IVerifies, IThrowsResult
+	{
+		protected Mock mock;
 		protected MethodInfo method;
 		Expression originalExpression;
 		Exception exception;
@@ -64,13 +108,20 @@ namespace Moq
 		int? expectedCallCount = null;
 		List<KeyValuePair<int, object>> outValues = new List<KeyValuePair<int, object>>();
 
+		// Where the setup was performed.
+		public string FileName { get; private set; }
+		public int FileLine { get; private set; }
+		public MethodBase TestMethod { get; private set; }
+
+		public string FailMessage { get; set; }
 		public bool IsVerifiable { get; set; }
 		public bool IsNever { get; set; }
 		public bool Invoked { get; set; }
 		public Expression SetupExpression { get { return originalExpression; } }
 
-		public MethodCall(Expression originalExpression, MethodInfo method, params Expression[] arguments)
+		public MethodCall(Mock mock, Expression originalExpression, MethodInfo method, params Expression[] arguments)
 		{
+			this.mock = mock;
 			this.originalExpression = originalExpression;
 			this.method = method;
 
@@ -108,6 +159,41 @@ namespace Moq
 					argumentMatchers.Add(MatcherFactory.CreateMatcher(argument));
 				}
 			}
+
+			SetFileInfo();
+		}
+
+		private void SetFileInfo()
+		{
+#if !SILVERLIGHT
+			var thisMethod = MethodBase.GetCurrentMethod();
+			var stack = new StackTrace(true);
+			var index = 0;
+
+			// Move 'till our own frame first
+			while (stack.GetFrame(index).GetMethod() != thisMethod 
+				&& index <= stack.FrameCount)
+			{
+				index++;
+			}
+
+			// Move 'till we're at the entry point 
+			// into Moq API
+			// Move 'till our own frame first
+			while (stack.GetFrame(index).GetMethod().DeclaringType.Namespace.StartsWith("Moq")
+				&& index <= stack.FrameCount)
+			{
+				index++;
+			}
+
+			if (index < stack.FrameCount)
+			{
+				var frame = stack.GetFrame(index);
+				FileLine = frame.GetFileLineNumber();
+				FileName = Path.GetFileName(frame.GetFileName());
+				TestMethod = frame.GetMethod();
+			}
+#endif
 		}
 
 		public void SetOutParameters(IInvocation call)
@@ -277,6 +363,12 @@ namespace Moq
 			IsVerifiable = true;
 		}
 
+		public void Verifiable(string failMessage)
+		{
+			IsVerifiable = true;
+			FailMessage = failMessage;
+		}
+
 		private bool IsEqualMethodOrOverride(IInvocation call)
 		{
 			if (call.Method == method)
@@ -367,5 +459,18 @@ namespace Moq
 
 			return this;
 		}
+
+#if !SILVERLIGHT
+		protected IVerifies RaisesImpl<TMock>(Action<TMock> eventExpression, Delegate func)
+		{
+			var ev = eventExpression.GetEvent();
+
+			mockEvent = new MockedEvent(mock);
+			mockEvent.Event = ev;
+			mockEventArgsFunc = func;
+
+			return this;
+		}
+#endif
 	}
 }

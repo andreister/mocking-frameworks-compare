@@ -43,6 +43,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Castle.Core.Interceptor;
+using System.Globalization;
 
 namespace Moq
 {
@@ -108,16 +109,33 @@ namespace Moq
 			{
 				return del.DynamicInvoke(args);
 			}
-			catch (TargetParameterCountException)
-			{
-				// TODO: provide better error message
-				throw;
-			}
 			catch (TargetInvocationException ex)
 			{
+#if SILVERLIGHT
+			/* The test listed below fails when we call the setValue in silverlight...
+			 * 
+			 * 
+			 * Assembly:
+			 *    Moq.Tests.Silverlight.MSTest
+			 * Namespace:
+			 *    Moq.Tests
+			 * Test class:
+			 *    MockedEventsFixture
+			 * Test method:
+			 *    ShouldPreserveStackTraceWhenRaisingEvent
+			 * at System.Reflection.RtFieldInfo.PerformVisibilityCheckOnField(IntPtr field, Object target, IntPtr declaringType, FieldAttributes attr, UInt32 invocationFlags) at System.Reflection.RtFieldInfo.InternalSetValue(Object obj, Object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture, Boolean doVisibilityCheck, Boolean doCheckConsistency) at System.Reflection.RtFieldInfo.InternalSetValue(Object obj, Object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture, Boolean doVisibilityCheck) at System.Reflection.RtFieldInfo.SetValue(Object obj, Object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture) at System.Reflection.FieldInfo.SetValue(Object obj, Object value) at Moq.Extensions.InvokePreserveStack(Delegate del, Object[] args) at Moq.MockedEvent.DoRaise(EventArgs args) at Moq.MockedEvent`1.Raise(TEventArgs args) at Moq.Tests.MockedEventsFixture.<>c__DisplayClass16.<ShouldPreserveStackTraceWhenRaisingEvent>b__14() at Xunit.Record.Exception(ThrowsDelegate code)
+			 */
+#else
 				remoteStackTraceString.SetValue(ex.InnerException, ex.InnerException.StackTrace);
+				ex.InnerException.SetStackTrace(ex.InnerException.StackTrace);
+#endif
 				throw ex.InnerException;
 			}
+		}
+
+		public static void SetStackTrace(this Exception exception, string stackTrace)
+		{
+			remoteStackTraceString.SetValue(exception, stackTrace);
 		}
 
 		public static bool IsMockeable(this Type typeToMock)
@@ -149,5 +167,44 @@ namespace Moq
 
 			return false;
 		}
+#if !SILVERLIGHT
+		public static EventInfo GetEvent<TMock>(this Action<TMock> eventExpression)
+		{
+			Guard.ArgumentNotNull(eventExpression, "eventExpression");
+
+			var reader = new Indy.IL2CPU.IL.ILReader(eventExpression.Method);
+			MethodBase addRemove = null;
+			while (reader.Read())
+			{
+				if (reader.OpCode == Indy.IL2CPU.IL.OpCodeEnum.Callvirt &&
+					(reader.OperandValueMethod.Name.StartsWith("add_") ||
+					reader.OperandValueMethod.Name.StartsWith("remove_")))
+				{
+					addRemove = reader.OperandValueMethod;
+					break;
+				}
+			}
+
+			if (addRemove == null)
+			{
+				throw new ArgumentException("Expression is not an event attach or detach.");
+			}
+
+			var ev = addRemove.DeclaringType.GetEvent(
+					addRemove.Name.Replace("add_", "").Replace("remove_", ""));
+
+			if (ev == null)
+			{
+				throw new ArgumentException(String.Format(CultureInfo.CurrentCulture,
+					"Could not locate event for attach or detach method {0}.", addRemove.ToString()));
+			}
+			else if (!addRemove.IsVirtual)
+			{
+				throw new ArgumentException("Event must be declared on an interface, or be marked virtual.");
+			}
+
+			return ev;
+		}
+#endif
 	}
 }

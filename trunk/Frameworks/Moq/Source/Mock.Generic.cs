@@ -46,7 +46,7 @@ using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
 using Moq.Language.Flow;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Moq
 {
@@ -127,6 +127,9 @@ namespace Moq
 			// having members that we need just internally for the legacy 
 			// extensions to work, and we don't want them publicly in an IMock 
 			// interface. It's a messy issue... discuss with team.
+			// The skipInitialize parameter is not used at all, and it's 
+			// just to differentiate this ctor that should do nothing 
+			// from the regular one which initializes the proxy, etc.
 		}
 
 		/// <summary>
@@ -217,42 +220,45 @@ namespace Moq
 
 		private void InitializeInstance()
 		{
-			var mockType = typeof(T);
-
-			try
+			PexProtector.Invoke(() =>
 			{
-				if (mockType.IsInterface)
+				var mockType = typeof(T);
+
+				try
 				{
-					instance
-						= (T)generator.CreateInterfaceProxyWithoutTarget(mockType, base.ImplementedInterfaces.ToArray(), Interceptor);
-				}
-				else
-				{
-					try
+					if (mockType.IsInterface)
 					{
-						if (constructorArguments.Length > 0)
+						instance
+							= (T)generator.CreateInterfaceProxyWithoutTarget(mockType, base.ImplementedInterfaces.ToArray(), Interceptor);
+					}
+					else
+					{
+						try
 						{
-							var generatedType = generator.ProxyBuilder.CreateClassProxy(mockType, base.ImplementedInterfaces.ToArray(), new ProxyGenerationOptions());
-							instance
-								= (T)Activator.CreateInstance(generatedType,
-									new object[] { new IInterceptor[] { Interceptor } }.Concat(constructorArguments).ToArray());
+							if (constructorArguments.Length > 0)
+							{
+								var generatedType = generator.ProxyBuilder.CreateClassProxy(mockType, base.ImplementedInterfaces.ToArray(), new ProxyGenerationOptions());
+								instance
+									= (T)Activator.CreateInstance(generatedType,
+										new object[] { new IInterceptor[] { Interceptor } }.Concat(constructorArguments).ToArray());
+							}
+							else
+							{
+								instance = (T)generator.CreateClassProxy(mockType, base.ImplementedInterfaces.ToArray(), Interceptor);
+							}
 						}
-						else
+						catch (TypeLoadException tle)
 						{
-							instance = (T)generator.CreateClassProxy(mockType, base.ImplementedInterfaces.ToArray(), Interceptor);
+							throw new ArgumentException(Properties.Resources.InvalidMockClass, tle);
 						}
 					}
-					catch (TypeLoadException tle)
-					{
-						throw new ArgumentException(Properties.Resources.InvalidMockClass, tle);
-					}
-				}
 
-			}
-			catch (MissingMethodException mme)
-			{
-				throw new ArgumentException(Properties.Resources.ConstructorNotFound, mme);
-			}
+				}
+				catch (MissingMethodException mme)
+				{
+					throw new ArgumentException(Properties.Resources.ConstructorNotFound, mme);
+				}
+			});
 		}
 
 		/// <summary>
@@ -285,9 +291,9 @@ namespace Moq
 		/// mock.Setup(x =&gt; x.Execute("ping"));
 		/// </code>
 		/// </example>
-		public virtual ISetup Setup(Expression<Action<T>> expression)
+		public ISetup<T> Setup(Expression<Action<T>> expression)
 		{
-			return Mock.Setup<T>(expression, this.Interceptor);
+			return Mock.Setup<T>(this, expression);
 		}
 
 		/// <summary>
@@ -305,9 +311,9 @@ namespace Moq
 		/// mock.Setup(x =&gt; x.HasInventory("Talisker", 50)).Returns(true);
 		/// </code>
 		/// </example>
-		public virtual ISetup<TResult> Setup<TResult>(Expression<Func<T, TResult>> expression)
+		public ISetup<T, TResult> Setup<TResult>(Expression<Func<T, TResult>> expression)
 		{
-			return Setup(expression, this.Interceptor);
+			return Mock.Setup(this, expression);
 		}
 
 		/// <summary>
@@ -326,51 +332,55 @@ namespace Moq
 		///     .Returns(true);
 		/// </code>
 		/// </example>
-		public virtual ISetupGetter<TProperty> SetupGet<TProperty>(Expression<Func<T, TProperty>> expression)
+		public ISetupGetter<T, TProperty> SetupGet<TProperty>(Expression<Func<T, TProperty>> expression)
 		{
-			return SetupGet(expression, this.Interceptor);
+			return Mock.SetupGet(this, expression);
+		}
+
+#if !SILVERLIGHT
+		/// <summary>
+		/// Specifies a setup on the mocked type for a call to 
+		/// to a property setter. 
+		/// </summary>
+		/// <remarks>
+		/// If more than one setup is set for the same property setter, 
+		/// the latest one wins and is the one that will be executed.
+		/// <para>
+		/// This overloads allows the use of a callback already 
+		/// typed for the property type.
+		/// </para>
+		/// </remarks>
+		/// <typeparam name="TProperty">Type of the property. Typically omitted as it can be inferred from the expression.</typeparam>
+		/// <param name="setterExpression">Lambda expression that sets a property to a value.</param>
+		/// <example group="setups">
+		/// <code>
+		/// mock.SetupSet(x =&gt; x.Suspended = true);
+		/// </code>
+		/// </example>
+		public ISetupSetter<T, TProperty> SetupSet<TProperty>(Action<T> setterExpression)
+		{
+			return Mock.SetupSet<T, TProperty>(this, setterExpression);
 		}
 
 		/// <summary>
 		/// Specifies a setup on the mocked type for a call to 
-		/// to a property setter.
+		/// to a property setter. 
 		/// </summary>
 		/// <remarks>
 		/// If more than one setup is set for the same property setter, 
 		/// the latest one wins and is the one that will be executed.
 		/// </remarks>
-		/// <typeparam name="TProperty">Type of the property. Typically omitted as it can be inferred from the expression.</typeparam>
-		/// <param name="expression">Lambda expression that specifies the property setter.</param>
+		/// <param name="setterExpression">Lambda expression that sets a property to a value.</param>
 		/// <example group="setups">
 		/// <code>
-		/// mock.SetupSet(x =&gt; x.Suspended);
+		/// mock.SetupSet(x =&gt; x.Suspended = true);
 		/// </code>
 		/// </example>
-		public virtual ISetupSetter<TProperty> SetupSet<TProperty>(Expression<Func<T, TProperty>> expression)
+		public ISetup<T> SetupSet(Action<T> setterExpression)
 		{
-			return SetupSet<T, TProperty>(expression, this.Interceptor);
+			return Mock.SetupSet<T>(this, setterExpression);
 		}
-
-		/// <summary>
-		/// Specifies a setup on the mocked type for a call to 
-		/// to a property setter with a specific value.
-		/// </summary>
-		/// <remarks>
-		/// More than one setup can be set for the setter with 
-		/// different values.
-		/// </remarks>
-		/// <typeparam name="TProperty">Type of the property. Typically omitted as it can be inferred from the expression.</typeparam>
-		/// <param name="expression">Lambda expression that specifies the property setter.</param>
-		/// <param name="value">The value to be set for the property.</param>
-		/// <example group="setups">
-		/// <code>
-		/// mock.SetupSet(x =&gt; x.Suspended, true);
-		/// </code>
-		/// </example>
-		public virtual ISetupSetter<TProperty> SetupSet<TProperty>(Expression<Func<T, TProperty>> expression, TProperty value)
-		{
-			return SetupSet(expression, value, this.Interceptor);
-		}
+#endif
 
 		/// <summary>
 		/// Specifies that the given property should have "property behavior", 
@@ -397,8 +407,8 @@ namespace Moq
 		/// Assert.Equal(5, v.Value);
 		/// </code>
 		/// </example>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "This sets properties, so it's appropriate.")]
-		public virtual void SetupProperty<TProperty>(Expression<Func<T, TProperty>> property)
+		[SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "This sets properties, so it's appropriate.")]
+		public void SetupProperty<TProperty>(Expression<Func<T, TProperty>> property)
 		{
 			SetupProperty(property, default(TProperty));
 		}
@@ -433,14 +443,15 @@ namespace Moq
 		/// Assert.Equal(6, v.Value);
 		/// </code>
 		/// </example>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "We're setting up a property, so it's appropriate.")]
-		public virtual void SetupProperty<TProperty>(Expression<Func<T, TProperty>> property, TProperty initialValue)
+		[SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "We're setting up a property, so it's appropriate.")]
+		public void SetupProperty<TProperty>(Expression<Func<T, TProperty>> property, TProperty initialValue)
 		{
 			TProperty value = initialValue;
 			SetupGet(property).Returns(() => value);
-			SetupSet(property).Callback(p => value = p);
+			SetupSet<T, TProperty>(this, property).Callback(p => value = p);
 		}
 
+#if !SILVERLIGHT
 		/// <summary>
 		/// Specifies that the all properties on the mock should have "property behavior", 
 		/// meaning that setting its value will cause it to be saved and 
@@ -452,98 +463,23 @@ namespace Moq
 		/// If the mock <see cref="Mock.DefaultValue"/> is set to <see cref="DefaultValue.Mock"/>, 
 		/// the mocked default values will also get all properties setup recursively.
 		/// </remarks>
-		public virtual void SetupAllProperties()
+		public void SetupAllProperties()
 		{
 			SetupAllProperties(this);
 		}
-
-		private static void SetupAllProperties(Mock mock)
-		{
-			// Crazy reflection stuff below. Ah... the goodies of generics :)
-			var mockType = mock.MockedType;
-			var properties = new List<PropertyInfo>();
-			properties.AddRange(mockType.GetProperties());
-			// Add all implemented properties too.
-			properties.AddRange(
-					from i in mockType.GetInterfaces()
-					from p in i.GetProperties()
-					select p);
-			// Add all properties from base classes
-			properties = properties.Distinct().ToList();
-
-			foreach (var property in properties)
-			{
-				if (property.CanRead && property.CanOverrideGet())
-				{
-					var expect = GetPropertyExpression(mockType, property);
-					object initialValue = mock.DefaultValueProvider.ProvideDefault(property.GetGetMethod(), new object[0]);
-					var mocked = initialValue as IMocked;
-					if (mocked != null)
-						SetupAllProperties(mocked.Mock);
-
-					var closure = Activator.CreateInstance(
-							typeof(ValueClosure<>).MakeGenericType(property.PropertyType), initialValue);
-
-					var resultGet = mock
-							.GetType()
-							.GetMethod("SetupGet")
-							.MakeGenericMethod(property.PropertyType)
-							.Invoke(mock, new[] { expect });
-
-					var returnsGet = resultGet.GetType().GetMethod("Returns", new[] { typeof(Func<>).MakeGenericType(property.PropertyType) });
-
-					var getFunc = Activator.CreateInstance(
-							typeof(Func<>).MakeGenericType(property.PropertyType),
-							closure,
-							closure.GetType().GetMethod("GetValue").MethodHandle.GetFunctionPointer());
-
-					returnsGet.Invoke(resultGet, new[] { getFunc });
-
-					if (property.CanWrite && property.CanOverrideSet())
-					{
-						var resultSet = mock
-								.GetType()
-								.GetMethods()
-							// Couldn't make it work passing the generic types to GetMethod()
-								.Where(m => m.Name == "SetupSet" && m.GetParameters().Length == 1)
-								.First()
-								.MakeGenericMethod(property.PropertyType)
-								.Invoke(mock, new[] { expect });
-
-						var callbackSet = resultSet.GetType().GetMethod("Callback", new[] { typeof(Action<>).MakeGenericType(property.PropertyType) });
-
-						var setFunc = Activator.CreateInstance(
-								typeof(Action<>).MakeGenericType(property.PropertyType),
-								closure,
-								closure.GetType().GetMethod("SetValue").MethodHandle.GetFunctionPointer());
-
-						callbackSet.Invoke(resultSet, new[] { setFunc });
-					}
-				}
-			}
-		}
-
-		private static Expression GetPropertyExpression(Type mockType, PropertyInfo property)
-		{
-			var param = Expression.Parameter(mockType, "m");
-			return Expression.Lambda(
-					Expression.MakeMemberAccess(param, property),
-					param);
-		}
+#endif
 
 		#endregion
 
 		#region Verify
 
 		/// <summary>
-		/// Verifies that a specific invocation matching the given 
-		/// expression was performed on the mock. Use in conjuntion 
-		/// with the default <see cref="MockBehavior.Loose"/>.
+		/// Verifies that a specific invocation matching the given expression was performed on the mock. Use
+		/// in conjuntion with the default <see cref="MockBehavior.Loose"/>.
 		/// </summary>
 		/// <example group="verification">
-		/// This example assumes that the mock has been used, 
-		/// and later we want to verify that a given invocation 
-		/// with specific parameters was performed:
+		/// This example assumes that the mock has been used, and later we want to verify that a given
+		/// invocation with specific parameters was performed:
 		/// <code>
 		/// var mock = new Mock&lt;IProcessor&gt;();
 		/// // exercise mock
@@ -554,20 +490,70 @@ namespace Moq
 		/// </example>
 		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
 		/// <param name="expression">Expression to verify.</param>
-		public virtual void Verify(Expression<Action<T>> expression)
+		public void Verify(Expression<Action<T>> expression)
 		{
-			Verify(expression, Interceptor);
+			Mock.Verify(this, expression, Times.AtLeastOnce(), null);
 		}
 
 		/// <summary>
-		/// Verifies that a specific invocation matching the given 
-		/// expression was performed on the mock. Use in conjuntion 
-		/// with the default <see cref="MockBehavior.Loose"/>.
+		/// Verifies that a specific invocation matching the given expression was performed on the mock. Use
+		/// in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		public void Verify(Expression<Action<T>> expression, Times times)
+		{
+			Mock.Verify(this, expression, times, null);
+		}
+
+		/// <summary>
+		/// Verifies that a specific invocation matching the given expression was performed on the mock,
+		/// specifying a failure error message. Use in conjuntion with the default
+		/// <see cref="MockBehavior.Loose"/>.
 		/// </summary>
 		/// <example group="verification">
-		/// This example assumes that the mock has been used, 
-		/// and later we want to verify that a given invocation 
-		/// with specific parameters was performed:
+		/// This example assumes that the mock has been used, and later we want to verify that a given
+		/// invocation with specific parameters was performed:
+		/// <code>
+		/// var mock = new Mock&lt;IProcessor&gt;();
+		/// // exercise mock
+		/// //...
+		/// // Will throw if the test code didn't call Execute with a "ping" string argument.
+		/// mock.Verify(proc =&gt; proc.Execute("ping"));
+		/// </code>
+		/// </example>
+		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		public void Verify(Expression<Action<T>> expression, string failMessage)
+		{
+			Mock.Verify(this, expression, Times.AtLeastOnce(), failMessage);
+		}
+
+		/// <summary>
+		/// Verifies that a specific invocation matching the given expression was performed on the mock,
+		/// specifying a failure error message. Use in conjuntion with the default
+		/// <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		public void Verify(Expression<Action<T>> expression, Times times, string failMessage)
+		{
+			Mock.Verify(this, expression, times, failMessage);
+		}
+
+		/// <summary>
+		/// Verifies that a specific invocation matching the given expression was performed on the mock. Use
+		/// in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <example group="verification">
+		/// This example assumes that the mock has been used, and later we want to verify that a given
+		/// invocation with specific parameters was performed:
 		/// <code>
 		/// var mock = new Mock&lt;IWarehouse&gt;();
 		/// // exercise mock
@@ -579,9 +565,68 @@ namespace Moq
 		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
 		/// <param name="expression">Expression to verify.</param>
 		/// <typeparam name="TResult">Type of return value from the expression.</typeparam>
-		public virtual void Verify<TResult>(Expression<Func<T, TResult>> expression)
+		public void Verify<TResult>(Expression<Func<T, TResult>> expression)
 		{
-			Verify(expression, Interceptor);
+			Mock.Verify(this, expression, Times.AtLeastOnce(), null);
+		}
+
+		/// <summary>
+		/// Verifies that a specific invocation matching the given 
+		/// expression was performed on the mock. Use in conjuntion 
+		/// with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <typeparam name="TResult">Type of return value from the expression.</typeparam>
+		public void Verify<TResult>(Expression<Func<T, TResult>> expression, Times times)
+		{
+			Mock.Verify(this, expression, times, null);
+		}
+
+		/// <summary>
+		/// Verifies that a specific invocation matching the given 
+		/// expression was performed on the mock, specifying a failure  
+		/// error message.
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <example group="verification">
+		/// This example assumes that the mock has been used, 
+		/// and later we want to verify that a given invocation 
+		/// with specific parameters was performed:
+		/// <code>
+		/// var mock = new Mock&lt;IWarehouse&gt;();
+		/// // exercise mock
+		/// //...
+		/// // Will throw if the test code didn't call HasInventory.
+		/// mock.Verify(warehouse =&gt; warehouse.HasInventory(TALISKER, 50), "When filling orders, inventory has to be checked");
+		/// </code>
+		/// </example>
+		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		/// <typeparam name="TResult">Type of return value from the expression.</typeparam>
+		public void Verify<TResult>(Expression<Func<T, TResult>> expression, string failMessage)
+		{
+			Mock.Verify(this, expression, Times.AtLeastOnce(), failMessage);
+		}
+
+		/// <summary>
+		/// Verifies that a specific invocation matching the given 
+		/// expression was performed on the mock, specifying a failure  
+		/// error message.
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		/// <typeparam name="TResult">Type of return value from the expression.</typeparam>
+		public void Verify<TResult>(Expression<Func<T, TResult>> expression, Times times, string failMessage)
+		{
+			Mock.Verify(this, expression, times, failMessage);
 		}
 
 		/// <summary>
@@ -604,61 +649,150 @@ namespace Moq
 		/// <param name="expression">Expression to verify.</param>
 		/// <typeparam name="TProperty">Type of the property to verify. Typically omitted as it can 
 		/// be inferred from the expression's return type.</typeparam>
-		public virtual void VerifyGet<TProperty>(Expression<Func<T, TProperty>> expression)
+		public void VerifyGet<TProperty>(Expression<Func<T, TProperty>> expression)
 		{
-			VerifyGet(expression, Interceptor);
+			Mock.VerifyGet(this, expression, Times.AtLeastOnce(), null);
 		}
 
 		/// <summary>
-		/// Verifies that a property has been set on the mock. 
+		/// Verifies that a property was read on the mock. 
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <param name="expression">Expression to verify.</param>
+		/// <typeparam name="TProperty">Type of the property to verify. Typically omitted as it can 
+		/// be inferred from the expression's return type.</typeparam>
+		public void VerifyGet<TProperty>(Expression<Func<T, TProperty>> expression, Times times)
+		{
+			Mock.VerifyGet(this, expression, times, null);
+		}
+
+		/// <summary>
+		/// Verifies that a property was read on the mock, specifying a failure  
+		/// error message. 
 		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
 		/// </summary>
 		/// <example group="verification">
 		/// This example assumes that the mock has been used, 
-		/// and later we want to verify that a given invocation 
-		/// with specific parameters was performed:
+		/// and later we want to verify that a given property 
+		/// was retrieved from it:
+		/// <code>
+		/// var mock = new Mock&lt;IWarehouse&gt;();
+		/// // exercise mock
+		/// //...
+		/// // Will throw if the test code didn't retrieve the IsClosed property.
+		/// mock.VerifyGet(warehouse =&gt; warehouse.IsClosed);
+		/// </code>
+		/// </example>
+		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		/// <typeparam name="TProperty">Type of the property to verify. Typically omitted as it can 
+		/// be inferred from the expression's return type.</typeparam>
+		public void VerifyGet<TProperty>(Expression<Func<T, TProperty>> expression, string failMessage)
+		{
+			Mock.VerifyGet(this, expression, Times.AtLeastOnce(), failMessage);
+		}
+
+		/// <summary>
+		/// Verifies that a property was read on the mock, specifying a failure  
+		/// error message. 
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <param name="expression">Expression to verify.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		/// <typeparam name="TProperty">Type of the property to verify. Typically omitted as it can 
+		/// be inferred from the expression's return type.</typeparam>
+		public void VerifyGet<TProperty>(
+			Expression<Func<T, TProperty>> expression,
+			Times times,
+			string failMessage)
+		{
+			Mock.VerifyGet(this, expression, times, failMessage);
+		}
+
+#if !SILVERLIGHT
+		/// <summary>
+		/// Verifies that a property was set on the mock.
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <example group="verification">
+		/// This example assumes that the mock has been used, 
+		/// and later we want to verify that a given property 
+		/// was set on it:
 		/// <code>
 		/// var mock = new Mock&lt;IWarehouse&gt;();
 		/// // exercise mock
 		/// //...
 		/// // Will throw if the test code didn't set the IsClosed property.
-		/// mock.VerifySet(warehouse =&gt; warehouse.IsClosed);
+		/// mock.VerifySet(warehouse =&gt; warehouse.IsClosed = true);
 		/// </code>
 		/// </example>
 		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
-		/// <param name="expression">Expression to verify.</param>
-		/// <typeparam name="TProperty">Type of the property to verify. Typically omitted as it can 
-		/// be inferred from the expression's return type.</typeparam>
-		public virtual void VerifySet<TProperty>(Expression<Func<T, TProperty>> expression)
+		/// <param name="setterExpression">Expression to verify.</param>
+		public void VerifySet(Action<T> setterExpression)
 		{
-			VerifySet(expression, Interceptor);
+			Mock.VerifySet(this, setterExpression, Times.AtLeastOnce(), null);
 		}
 
 		/// <summary>
-		/// Verifies that a property has been set on the mock to the given value.
+		/// Verifies that a property was set on the mock.
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <param name="setterExpression">Expression to verify.</param>
+		public void VerifySet(Action<T> setterExpression, Times times)
+		{
+			Mock.VerifySet(this, setterExpression, times, null);
+		}
+
+		/// <summary>
+		/// Verifies that a property was set on the mock, specifying 
+		/// a failure message.
 		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
 		/// </summary>
 		/// <example group="verification">
 		/// This example assumes that the mock has been used, 
-		/// and later we want to verify that a given invocation 
-		/// with specific parameters was performed:
+		/// and later we want to verify that a given property 
+		/// was set on it:
 		/// <code>
 		/// var mock = new Mock&lt;IWarehouse&gt;();
 		/// // exercise mock
 		/// //...
-		/// // Will throw if the test code didn't set the IsClosed property to true
-		/// mock.VerifySet(warehouse =&gt; warehouse.IsClosed, true);
+		/// // Will throw if the test code didn't set the IsClosed property.
+		/// mock.VerifySet(warehouse =&gt; warehouse.IsClosed = true, "Warehouse should always be closed after the action");
 		/// </code>
 		/// </example>
 		/// <exception cref="MockException">The invocation was not performed on the mock.</exception>
-		/// <param name="expression">Expression to verify.</param>
-		/// <param name="value">The value that should have been set on the property.</param>
-		/// <typeparam name="TProperty">Type of the property to verify. Typically omitted as it can 
-		/// be inferred from the expression's return type.</typeparam>
-		public virtual void VerifySet<TProperty>(Expression<Func<T, TProperty>> expression, TProperty value)
+		/// <param name="setterExpression">Expression to verify.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		public void VerifySet(Action<T> setterExpression, string failMessage)
 		{
-			VerifySet(expression, value, Interceptor);
+			Mock.VerifySet(this, setterExpression, Times.AtLeastOnce(), failMessage);
 		}
+
+		/// <summary>
+		/// Verifies that a property was set on the mock, specifying 
+		/// a failure message.
+		/// Use in conjuntion with the default <see cref="MockBehavior.Loose"/>.
+		/// </summary>
+		/// <exception cref="MockException">The invocation was not call the times specified by
+		/// <paramref name="times"/>.</exception>
+		/// <param name="times">The times a method is allowed to be called.</param>
+		/// <param name="setterExpression">Expression to verify.</param>
+		/// <param name="failMessage">Message to show if verification fails.</param>
+		public void VerifySet(Action<T> setterExpression, Times times, string failMessage)
+		{
+			Mock.VerifySet(this, setterExpression, times, failMessage);
+		}
+#endif
 
 		#endregion
 
@@ -697,7 +831,7 @@ namespace Moq
 		/// </code>
 		/// </example>
 		/// <typeparam name="TInterface">Type of interface to cast the mock to.</typeparam>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "As", Justification = "We want the method called exactly as the keyword because that's what it does, it adds an implemented interface so that you can cast it later.")]
+		[SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "As", Justification = "We want the method called exactly as the keyword because that's what it does, it adds an implemented interface so that you can cast it later.")]
 		public virtual Mock<TInterface> As<TInterface>()
 			where TInterface : class
 		{
@@ -730,31 +864,6 @@ namespace Moq
 				this.owner = owner;
 			}
 
-			public override ISetup<TResult> Setup<TResult>(Expression<Func<TInterface, TResult>> expression)
-			{
-				return Mock.Setup(expression, owner.Interceptor);
-			}
-
-			public override ISetup Setup(Expression<Action<TInterface>> expression)
-			{
-				return Mock.Setup(expression, owner.Interceptor);
-			}
-
-			public override ISetupGetter<TProperty> SetupGet<TProperty>(Expression<Func<TInterface, TProperty>> expression)
-			{
-				return Mock.SetupGet(expression, owner.Interceptor);
-			}
-
-			public override ISetupSetter<TProperty> SetupSet<TProperty>(Expression<Func<TInterface, TProperty>> expression)
-			{
-				return Mock.SetupSet(expression, owner.Interceptor);
-			}
-
-			public override ISetupSetter<TProperty> SetupSet<TProperty>(Expression<Func<TInterface, TProperty>> expression, TProperty value)
-			{
-				return Mock.SetupSet(expression, value, owner.Interceptor);
-			}
-
 			internal override Dictionary<MethodInfo, Mock> InnerMocks
 			{
 				get { return owner.InnerMocks; }
@@ -766,6 +875,8 @@ namespace Moq
 				get { return owner.Interceptor; }
 				set { owner.Interceptor = value; }
 			}
+
+			internal override Type MockedType { get { return typeof(TInterface); } }
 
 			public override MockBehavior Behavior
 			{
@@ -795,31 +906,6 @@ namespace Moq
 				return owner.As<TNewInterface>();
 			}
 
-			public override void Verify(Expression<Action<TInterface>> expression)
-			{
-				Mock.Verify(expression, owner.Interceptor);
-			}
-
-			public override void Verify<TResult>(Expression<Func<TInterface, TResult>> expression)
-			{
-				Mock.Verify<TInterface, TResult>(expression, owner.Interceptor);
-			}
-
-			public override void VerifyGet<TProperty>(Expression<Func<TInterface, TProperty>> expression)
-			{
-				Mock.VerifyGet<TInterface, TProperty>(expression, owner.Interceptor);
-			}
-
-			public override void VerifySet<TProperty>(Expression<Func<TInterface, TProperty>> expression)
-			{
-				Mock.VerifySet<TInterface, TProperty>(expression, owner.Interceptor);
-			}
-
-			public override void VerifySet<TProperty>(Expression<Func<TInterface, TProperty>> expression, TProperty value)
-			{
-				Mock.VerifySet<TInterface, TProperty>(expression, value, owner.Interceptor);
-			}
-
 			public override MockedEvent<TEventArgs> CreateEventHandler<TEventArgs>()
 			{
 				return owner.CreateEventHandler<TEventArgs>();
@@ -833,6 +919,7 @@ namespace Moq
 
 		#endregion
 
+#if !SILVERLIGHT
 		/// <summary>
 		/// Raises the event referenced in <paramref name="eventExpression"/> using 
 		/// the given <paramref name="sender"/> and <paramref name="args"/> arguments.
@@ -867,34 +954,26 @@ namespace Moq
 		/// Assert.Equal("moq", presenter.SelectedOrder.ProductName);
 		/// </code>
 		/// </example>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Raises the event, rather than being one.")]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "We want to reset the stack trace to avoid Moq noise in it.")]
+		[SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Raises the event, rather than being one.")]
+		[SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "We want to reset the stack trace to avoid Moq noise in it.")]
 		public void Raise(Action<T> eventExpression, EventArgs args)
 		{
-			using (var callback = new EventInfoCallback())
+			var ev = eventExpression.GetEvent();
+
+			var me = new MockedEvent(this);
+			me.Event = ev;
+
+			try
 			{
-				callback.AddInterceptor(this.Interceptor);
-
-				eventExpression(this.Object);
-
-				if (callback.EventInfo == null)
-					throw new ArgumentException("Expression is not an event attach or detach, or event is defined on a class but was not marked virtual.");
-
-				var me = new MockedEvent(callback.Mock);
-				me.Event = callback.EventInfo;
-
-				try
-				{
-					me.DoRaise(args);
-				}
-				catch (Exception e)
-				{
-					// Reset stacktrace so user gets this call site only.
-					throw e;
-				}
+				me.DoRaise(args);
+			}
+			catch (Exception e)
+			{
+				// Reset stacktrace so user gets this call site only.
+				throw e;
 			}
 		}
-
+#endif
 		// NOTE: known issue. See https://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=318122
 		//public static implicit operator TInterface(Mock<T> mock)
 		//{
@@ -909,7 +988,7 @@ namespace Moq
 		//}
 	}
 
-	class ValueClosure<TValue>
+	internal class ValueClosure<TValue>
 	{
 		public ValueClosure(TValue initialValue)
 		{
