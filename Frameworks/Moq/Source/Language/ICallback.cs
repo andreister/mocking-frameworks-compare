@@ -161,9 +161,10 @@ namespace Moq.Language
 	/// Defines the <c>Callback</c> verb and overloads for callbacks on 
 	/// setups that return a value.
 	/// </summary>
+	/// <typeparam name="TMock">Mocked type.</typeparam>
 	/// <typeparam name="TResult">Type of the return value of the setup.</typeparam>
 	[EditorBrowsable(EditorBrowsableState.Never)]
-	public interface ICallback<TResult> : IHideObjectMembers
+	public interface ICallback<TMock, TResult> : IHideObjectMembers
 	{
 		/// <summary>
 		/// Specifies a callback to invoke when the method is called.
@@ -181,7 +182,7 @@ namespace Moq.Language
 		/// Note that in the case of value-returning methods, after the <c>Callback</c> 
 		/// call you can still specify the return value.
 		/// </example>
-		IReturnsThrows<TResult> Callback(Action action);
+		IReturnsThrows<TMock, TResult> Callback(Action action);
 		
 		/// <summary>
 		/// Specifies a callback to invoke when the method is called that receives the original
@@ -201,7 +202,7 @@ namespace Moq.Language
 		///     .Returns(true);
 		/// </code>
 		/// </example>
-		IReturnsThrows<TResult> Callback<T>(Action<T> action);
+		IReturnsThrows<TMock, TResult> Callback<T>(Action<T> action);
 		
 		/// <summary>
 		/// Specifies a callback to invoke when the method is called that receives the original
@@ -224,7 +225,7 @@ namespace Moq.Language
 		///     .Returns(true);
 		/// </code>
 		/// </example>
-		IReturnsThrows<TResult> Callback<T1, T2>(Action<T1, T2> action);
+		IReturnsThrows<TMock, TResult> Callback<T1, T2>(Action<T1, T2> action);
 		
 		/// <summary>
 		/// Specifies a callback to invoke when the method is called that receives the original
@@ -249,7 +250,7 @@ namespace Moq.Language
 		///     .Returns(true);
 		/// </code>
 		/// </example>
-		IReturnsThrows<TResult> Callback<T1, T2, T3>(Action<T1, T2, T3> action);
+		IReturnsThrows<TMock, TResult> Callback<T1, T2, T3>(Action<T1, T2, T3> action);
 		
 		/// <summary>
 		/// Specifies a callback to invoke when the method is called that receives the original
@@ -276,6 +277,6 @@ namespace Moq.Language
 		///     .Returns(true);
 		/// </code>
 		/// </example>
-		IReturnsThrows<TResult> Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action);
+		IReturnsThrows<TMock, TResult> Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action);
 	}
 }

@@ -47,9 +47,10 @@ namespace Moq.Language
 	/// <summary>
 	/// Defines the <c>Returns</c> verb for property get setups.
 	/// </summary>
+	/// <typeparam name="TMock">Mocked type.</typeparam>
 	/// <typeparam name="TProperty">Type of the property.</typeparam>
 	[EditorBrowsable(EditorBrowsableState.Never)]
-	public interface IReturnsGetter<TProperty> : IHideObjectMembers
+	public interface IReturnsGetter<TMock, TProperty> : IHideObjectMembers
 	{
 		/// <summary>
 		/// Specifies the value to return.
@@ -62,7 +63,7 @@ namespace Moq.Language
 		///     .Returns(true);
 		/// </code>
 		/// </example>
-		IReturnsResult Returns(TProperty value);
+		IReturnsResult<TMock> Returns(TProperty value);
 
 		/// <summary>
 		/// Specifies a function that will calculate the value to return for the property.
@@ -79,6 +80,6 @@ namespace Moq.Language
 		/// is retrieved and the value the <c>returnValues</c> array has at 
 		/// that moment.
 		/// </example>
-		IReturnsResult Returns(Func<TProperty> valueFunction);
+		IReturnsResult<TMock> Returns(Func<TProperty> valueFunction);
 	}
 }
