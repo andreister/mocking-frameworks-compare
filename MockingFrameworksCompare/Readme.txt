@@ -28,7 +28,7 @@ The project contains the following test scenarios:
 The following versions of the mocking frameworks are used:
 * Moq			3.0.204.1  (checked out 18.02.2009, revision #482)
 * NMock2		1.2.3262   (checked out 18.02.2009, revision #101)
-* Rhino Mocks	3.5.0.2041 (checked out 18.02.2009, revision #1928)
+* Rhino Mocks		3.5.0.2041 (checked out 18.02.2009, revision #2041)
 * Isolator		5.1.2.0 
 
 
