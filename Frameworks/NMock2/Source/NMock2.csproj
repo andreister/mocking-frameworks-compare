@@ -11,8 +11,11 @@
     <AssemblyName>NMock2</AssemblyName>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NMock2.snk</AssemblyOriginatorKeyFile>
-    <FileUpgradeFlags>0</FileUpgradeFlags>
-    <OldToolsVersion>2.0</OldToolsVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
