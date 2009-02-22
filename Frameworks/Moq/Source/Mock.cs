@@ -41,48 +41,26 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Indy.IL2CPU.IL;
-using Moq.Properties;
 
 namespace Moq
 {
-	/// <summary>
-	/// Base class for mocks and static helper class with methods that 
-	/// apply to mocked objects, such as <see cref="Get"/> to 
-	/// retrieve a <see cref="Mock{T}"/> from an object instance.
-	/// </summary>
+	/// <include file='Mock.xdoc' path='docs/doc[@for="Mock"]/*'/>
 	public abstract partial class Mock : IHideObjectMembers
 	{
-		/// <summary>
-		/// Retrieves the mock object for the given object instance.
-		/// </summary>
-		/// <typeparam name="T">Type of the mock to retrieve. Can be omitted as it's inferred 
-		/// from the object instance passed in as the <paramref name="mocked"/> instance.</typeparam>
-		/// <param name="mocked">The instance of the mocked object.</param>
-		/// <returns>The mock associated with the mocked object.</returns>
-		/// <exception cref="ArgumentException">The received <paramref name="mocked"/> instance 
-		/// was not created by Moq.</exception>
-		/// <example group="advanced">
-		/// The following example shows how to add a new setup to an object 
-		/// instance which is not the original <see cref="Mock{T}"/> but rather 
-		/// the object associated with it:
-		/// <code>
-		/// // Typed instance, not the mock, is retrieved from some test API.
-		/// HttpContextBase context = GetMockContext();
-		/// 
-		/// // context.Request is the typed object from the "real" API
-		/// // so in order to add a setup to it, we need to get 
-		/// // the mock that "owns" it
-		/// Mock&lt;HttpRequestBase&gt; request = Mock.Get(context.Request);
-		/// mock.Setup(req => req.AppRelativeCurrentExecutionFilePath)
-		///     .Returns(tempUrl);
-		/// </code>
-		/// </example>
+		bool callBase = false;
+		DefaultValue defaultValue = DefaultValue.Empty;
+		IDefaultValueProvider defaultValueProvider = new EmptyDefaultValueProvider();
+		List<Type> implementedInterfaces = new List<Type>();
+		Dictionary<MethodInfo, Mock> innerMocks = new Dictionary<MethodInfo, Mock>();
+		Dictionary<EventInfo, List<Delegate>> invocationLists = new Dictionary<EventInfo, List<Delegate>>();
+
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.Get"]/*'/>
 		public static Mock<T> Get<T>(T mocked)
 			where T : class
 		{
@@ -139,36 +117,16 @@ namespace Moq
 			}
 		}
 
-		bool callBase = false;
-		DefaultValue defaultValue = DefaultValue.Empty;
-		IDefaultValueProvider defaultValueProvider = new EmptyDefaultValueProvider();
-		List<Type> implementedInterfaces = new List<Type>();
-		Dictionary<MethodInfo, Mock> innerMocks = new Dictionary<MethodInfo, Mock>();
-		Dictionary<EventInfo, List<Delegate>> invocationLists = new Dictionary<EventInfo, List<Delegate>>();
-
 		internal virtual Interceptor Interceptor { get; set; }
 		internal virtual Dictionary<MethodInfo, Mock> InnerMocks { get { return innerMocks; } set { innerMocks = value; } }
 
-		/// <summary>
-		/// Exposes the list of extra interfaces implemented by the mock.
-		/// </summary>
-		internal List<Type> ImplementedInterfaces { get { return implementedInterfaces; } }
-
-		/// <summary>
-		/// Behavior of the mock, according to the value set in the constructor.
-		/// </summary>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.Behavior"]/*'/>
 		public virtual MockBehavior Behavior { get; internal set; }
 
-		/// <summary>
-		/// Whether the base member virtual implementation will be called 
-		/// for mocked classes if no setup is matched. Defaults to <see langword="true"/>.
-		/// </summary>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.CallBase"]/*'/>
 		public virtual bool CallBase { get { return callBase; } set { callBase = value; } }
 
-		/// <summary>
-		/// Specifies the behavior to use when returning default values for 
-		/// unexpected invocations on loose mocks.
-		/// </summary>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.DefaultValue"]/*'/>
 		public virtual DefaultValue DefaultValue
 		{
 			get { return defaultValue; }
@@ -182,24 +140,12 @@ namespace Moq
 			}
 		}
 
-		/// <summary>
-		/// Specifies the class that will determine the default 
-		/// value to return when invocations are made that 
-		/// have no setups and need to return a default 
-		/// value (for loose mocks).
-		/// </summary>
-		internal IDefaultValueProvider DefaultValueProvider { get { return defaultValueProvider; } }
-
-		/// <summary>
-		/// Gets the mocked object instance.
-		/// </summary>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.Object"]/*'/>
 		[SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Object", Justification = "Exposes the mocked object instance, so it's appropriate.")]
 		[SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "The public Object property is the only one visible to Moq consumers. The protected member is for internal use only.")]
 		public object Object { get { return GetObject(); } }
 
-		/// <summary>
-		/// Returns the mocked object value.
-		/// </summary>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.GetObject"]/*'/>
 		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is actually the protected virtual implementation of the property Object.")]
 		protected abstract object GetObject();
 
@@ -209,26 +155,22 @@ namespace Moq
 		/// </summary>
 		internal abstract Type MockedType { get; }
 
-		#region Verify
+		/// <summary>
+		/// Specifies the class that will determine the default 
+		/// value to return when invocations are made that 
+		/// have no setups and need to return a default 
+		/// value (for loose mocks).
+		/// </summary>
+		internal IDefaultValueProvider DefaultValueProvider { get { return defaultValueProvider; } }
 
 		/// <summary>
-		/// Verifies that all verifiable expectations have been met.
+		/// Exposes the list of extra interfaces implemented by the mock.
 		/// </summary>
-		/// <example group="verification">
-		/// This example sets up an expectation and marks it as verifiable. After 
-		/// the mock is used, a <c>Verify()</c> call is issued on the mock 
-		/// to ensure the method in the setup was invoked:
-		/// <code>
-		/// var mock = new Mock&lt;IWarehouse&gt;();
-		/// this.Setup(x =&gt; x.HasInventory(TALISKER, 50)).Verifiable().Returns(true);
-		/// ...
-		/// // other test code
-		/// ...
-		/// // Will throw if the test code has didn't call HasInventory.
-		/// this.Verify();
-		/// </code>
-		/// </example>
-		/// <exception cref="MockException">Not all verifiable expectations were met.</exception>
+		internal List<Type> ImplementedInterfaces { get { return implementedInterfaces; } }
+
+		#region Verify
+
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.Verify"]/*'/>
 		[SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "We want to explicitly reset the stack trace here.")]
 		public void Verify()
 		{
@@ -251,26 +193,7 @@ namespace Moq
 			}
 		}
 
-		/// <summary>
-		/// Verifies all expectations regardless of whether they have 
-		/// been flagged as verifiable.
-		/// </summary>
-		/// <example group="verification">
-		/// This example sets up an expectation without marking it as verifiable. After 
-		/// the mock is used, a <see cref="VerifyAll"/> call is issued on the mock 
-		/// to ensure that all expectations are met:
-		/// <code>
-		/// var mock = new Mock&lt;IWarehouse&gt;();
-		/// this.Setup(x =&gt; x.HasInventory(TALISKER, 50)).Returns(true);
-		/// ...
-		/// // other test code
-		/// ...
-		/// // Will throw if the test code has didn't call HasInventory, even 
-		/// // that expectation was not marked as verifiable.
-		/// this.VerifyAll();
-		/// </code>
-		/// </example>
-		/// <exception cref="MockException">At least one expectation was not met.</exception>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.VerifyAll"]/*'/>		
 		[SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "We want to explicitly reset the stack trace here.")]
 		public void VerifyAll()
 		{
@@ -311,6 +234,7 @@ namespace Moq
 			Expression<Func<T, TResult>> expression,
 			Times times,
 			string failMessage)
+			where T : class
 		{
 			var lambda = expression.ToLambda();
 			if (lambda.IsProperty())
@@ -333,6 +257,7 @@ namespace Moq
 			Expression<Func<T, TProperty>> expression,
 			Times times,
 			string failMessage)
+			where T : class
 		{
 			var lambda = expression.ToLambda();
 			var prop = lambda.ToPropertyInfo();
@@ -350,6 +275,7 @@ namespace Moq
 			Expression<Func<T, TProperty>> expression,
 			Times times,
 			string failMessage)
+			where T : class
 		{
 			var lambda = expression.ToLambda();
 			var prop = lambda.ToPropertyInfo();
@@ -364,6 +290,7 @@ namespace Moq
 			TProperty value,
 			Times times,
 			string failMessage)
+			where T : class
 		{
 			var lambda = expression.ToLambda();
 			var prop = lambda.ToPropertyInfo();
@@ -372,7 +299,6 @@ namespace Moq
 			VerifyCalls(GetInterceptor(lambda, mock), expected, expression, times, failMessage);
 		}
 
-#if !SILVERLIGHT
 		internal static void VerifySet<T>(
 			Mock<T> mock,
 			Action<T> setterExpression,
@@ -382,7 +308,7 @@ namespace Moq
 		{
 			Interceptor targetInterceptor = null;
 			Expression expression = null;
-			var expected = CreateSetterCall<T, MethodCall<T>>(mock, setterExpression,
+			var expected = SetupSetImpl<T, MethodCall<T>>(mock, setterExpression,
 				(m, expr, method, value) =>
 				{
 					targetInterceptor = m.Interceptor;
@@ -392,7 +318,7 @@ namespace Moq
 
 			VerifyCalls(targetInterceptor, expected, expression, times, failMessage);
 		}
-#endif
+
 		private static void VerifyCalls(
 			Interceptor targetInterceptor,
 			MethodCall expected,
@@ -419,6 +345,7 @@ namespace Moq
 		#region Setup
 
 		internal static MethodCall<T1> Setup<T1>(Mock mock, Expression<Action<T1>> expression)
+			where T1 : class
 		{
 			return PexProtector.Invoke(() =>
 			{
@@ -438,6 +365,7 @@ namespace Moq
 		}
 
 		internal static MethodCallReturn<T1, TResult> Setup<T1, TResult>(Mock mock, Expression<Func<T1, TResult>> expression)
+			where T1 : class
 		{
 			return PexProtector.Invoke(() =>
 			{
@@ -462,6 +390,7 @@ namespace Moq
 		}
 
 		internal static MethodCallReturn<T1, TProperty> SetupGet<T1, TProperty>(Mock mock, Expression<Func<T1, TProperty>> expression)
+			where T1 : class
 		{
 			return PexProtector.Invoke(() =>
 			{
@@ -491,14 +420,13 @@ namespace Moq
 			});
 		}
 
-#if !SILVERLIGHT
 		internal static SetterMethodCall<T1, TProperty> SetupSet<T1, TProperty>(Mock<T1> mock,
 			Action<T1> setterExpression)
 			where T1 : class
 		{
 			return PexProtector.Invoke(() =>
 			{
-				return CreateSetterCall<T1, SetterMethodCall<T1, TProperty>>(mock, setterExpression,
+				return SetupSetImpl<T1, SetterMethodCall<T1, TProperty>>(mock, setterExpression,
 					(m, expr, method, value) =>
 					{
 						var call = new SetterMethodCall<T1, TProperty>(m, expr, method, value);
@@ -514,7 +442,7 @@ namespace Moq
 		{
 			return PexProtector.Invoke(() =>
 			{
-				return CreateSetterCall<T1, MethodCall<T1>>(mock, setterExpression,
+				return SetupSetImpl<T1, MethodCall<T1>>(mock, setterExpression,
 					(m, expr, method, value) =>
 					{
 						var call = new MethodCall<T1>(m, expr, method, value);
@@ -524,53 +452,50 @@ namespace Moq
 			});
 		}
 
-		private static TCall CreateSetterCall<T1, TCall>(Mock<T1> mock,
+		internal static SetterMethodCall<T1, TProperty> SetupSet<T1, TProperty>(Mock mock,
+			Expression<Func<T1, TProperty>> expression)
+			where T1 : class
+		{
+			var prop = expression.ToLambda().ToPropertyInfo();
+			ThrowIfPropertyNotWritable(prop);
+
+			var propSet = prop.GetSetMethod(true);
+			ThrowIfCantOverride(expression, propSet);
+
+			var call = new SetterMethodCall<T1, TProperty>(mock, expression, propSet);
+			var targetInterceptor = GetInterceptor(expression, mock);
+
+			targetInterceptor.AddCall(call, ExpectKind.PropertySet);
+
+			return call;
+		}
+
+		private static TCall SetupSetImpl<T1, TCall>(Mock<T1> mock,
 			Action<T1> setterExpression, Func<Mock, Expression, MethodInfo, Expression, TCall> callFactory)
 			where T1 : class
 			where TCall : MethodCall
 		{
-			var reader = new ILReader(setterExpression.Method);
-			MethodBase setter = null;
-			MethodInfo matcher = null;
-
-			while (reader.Read())
-			{
-				if (reader.OpCode == OpCodeEnum.Callvirt &&
-					reader.OperandValueMethod.Name.StartsWith("set_"))
-				{
-					setter = reader.OperandValueMethod;
-				}
-				else if (reader.OpCode == OpCodeEnum.Call || reader.OpCode == OpCodeEnum.Callvirt)
-				{
-					// See if we have a supported matcher invocation.
-					var m = reader.OperandValueMethod;
-					if (m.GetCustomAttribute<AdvancedMatcherAttribute>(true) != null ||
-						m.GetCustomAttribute<MatcherAttribute>(true) != null)
-					{
-						if (m.GetParameters().Length != 0)
-							throw new NotSupportedException(Properties.Resources.UnsupportedMatcherParamsForSetter);
-						if (!m.IsStatic)
-							throw new NotSupportedException(Properties.Resources.UnsupportedNonStaticMatcherForSetter);
-
-						// Can always cast as the matcher attribute is only valid on methods.
-						matcher = (MethodInfo)m;
-					}
-				}
-			}
-
-			if (setter == null)
-				throw new ArgumentException(Properties.Resources.SetupNotSetter);
-			ThrowIfCantOverride<T1>(setter);
-
 			using (var context = new FluentMockContext())
 			{
 				setterExpression(mock.Object);
 
 				var last = context.LastInvocation;
+
+				if (last == null)
+					throw new ArgumentException(String.Format(
+						CultureInfo.InvariantCulture, 
+						"SetupSet"));
+
+				var setter = last.Invocation.Method;
+				if (!setter.IsSpecialName || !setter.Name.StartsWith("set_"))
+					throw new ArgumentException(Properties.Resources.SetupNotSetter);
+
+				// No need to call ThrowIfCantOverride as non-overridable would have thrown above already.
+
 				var x = Expression.Parameter(last.Invocation.Method.DeclaringType, "x");
 
 				Expression value;
-				if (matcher == null)
+				if (last.Match == null)
 				{
 					value = last.Invocation.Arguments[0] != null &&
 						last.Invocation.Arguments[0].GetType() == setter.GetParameters()[0].ParameterType ?
@@ -579,25 +504,39 @@ namespace Moq
 						(Expression)Expression.Convert(
 							Expression.Constant(last.Invocation.Arguments[0]),
 							setter.GetParameters()[0].ParameterType);
+
+					var lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(x.Type),
+						Expression.Call(
+							x,
+							last.Invocation.Method,
+							value),
+						x);
+
+					return callFactory(last.Mock, lambda, last.Invocation.Method, value);
 				}
 				else
 				{
-					value = Expression.Call(matcher);
+					var matcherMethod = typeof(Match).GetMethod("Matcher", BindingFlags.Static | BindingFlags.NonPublic)
+						.MakeGenericMethod(last.Invocation.Method.GetParameters()[0].ParameterType);
+					var lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(x.Type),
+						Expression.Call(
+							x,
+							last.Invocation.Method, 
+							Expression.Call(matcherMethod)
+						), 
+						x);
+
+					return callFactory(last.Mock, lambda, last.Invocation.Method, new MatchExpression(last.Match));
 				}
-
-				var lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(x.Type),
-					Expression.Call(
-						x,
-						last.Invocation.Method,
-						value),
-					x);
-
-				return callFactory(last.Mock, lambda, last.Invocation.Method, value);
 			}
 		}
 
+#if !SILVERLIGHT
+		[Conditional("DESKTOP")]
 		internal static void SetupAllProperties(Mock mock)
 		{
+			// Dunno why the conditional is not kicking in. I'm getting 
+			// a compilation error on MethodHandle.GetFunctionPointer.
 			PexProtector.Invoke(() =>
 			{
 				// Crazy reflection stuff below. Ah... the goodies of generics :)
@@ -642,7 +581,7 @@ namespace Moq
 
 						if (property.CanWrite && property.CanOverrideSet())
 						{
-							var resultSet = typeof(MockLegacyExtensions)
+							var resultSet = typeof(MockExtensions)
 									.GetMethods()
 								// Couldn't make it work passing the generic types to GetMethod()
 									.Where(m => m.Name == "SetupSet" && m.GetParameters().Length == 2)
@@ -672,45 +611,6 @@ namespace Moq
 					Expression.MakeMemberAccess(param, property),
 					param);
 		}
-
-		#region Legacy
-
-		internal static SetterMethodCall<T1, TProperty> SetupSet<T1, TProperty>(Mock mock,
-			Expression<Func<T1, TProperty>> expression)
-		{
-			var prop = expression.ToLambda().ToPropertyInfo();
-			ThrowIfPropertyNotWritable(prop);
-
-			var propSet = prop.GetSetMethod(true);
-			ThrowIfCantOverride(expression, propSet);
-
-			var call = new SetterMethodCall<T1, TProperty>(mock, expression, propSet);
-			var targetInterceptor = GetInterceptor(expression, mock);
-
-			targetInterceptor.AddCall(call, ExpectKind.PropertySet);
-
-			return call;
-		}
-
-		internal static SetterMethodCall<T1, TProperty> SetupSet<T1, TProperty>(Mock mock,
-			Expression<Func<T1, TProperty>> expression, TProperty value)
-		{
-			var lambda = expression.ToLambda();
-			var prop = lambda.ToPropertyInfo();
-			ThrowIfPropertyNotWritable(prop);
-
-			var setter = prop.GetSetMethod();
-			ThrowIfCantOverride(expression, setter);
-
-			var call = new SetterMethodCall<T1, TProperty>(mock, expression, setter, value);
-			var targetInterceptor = GetInterceptor(expression, mock);
-
-			targetInterceptor.AddCall(call, ExpectKind.PropertySet);
-
-			return call;
-		}
-
-		#endregion
 
 		/// <summary>
 		/// Gets the interceptor target for the given expression and root mock, 
@@ -906,72 +806,14 @@ namespace Moq
 				return handlers;
 		}
 
-		/// <summary>
-		/// Creates a handler that can be associated to an event receiving 
-		/// the given <typeparamref name="TEventArgs"/> and can be used 
-		/// to raise the event.
-		/// </summary>
-		/// <typeparam name="TEventArgs">Type of <see cref="EventArgs"/> 
-		/// data passed in to the event.</typeparam>
-		/// <example>
-		/// This example shows how to invoke an event with a custom event arguments 
-		/// class in a view that will cause its corresponding presenter to 
-		/// react by changing its state:
-		/// <code>
-		/// var mockView = new Mock&lt;IOrdersView&gt;();
-		/// var mockedEvent = mockView.CreateEventHandler&lt;OrderEventArgs&gt;();
-		/// 
-		/// var presenter = new OrdersPresenter(mockView.Object);
-		/// 
-		/// // Check that the presenter has no selection by default
-		/// Assert.Null(presenter.SelectedOrder);
-		/// 
-		/// // Create a mock event handler of the appropriate type
-		/// var handler = mockView.CreateEventHandler&lt;OrderEventArgs&gt;();
-		/// // Associate it with the event we want to raise
-		/// mockView.Object.Cancel += handler;
-		/// // Finally raise the event with a specific arguments data
-		/// handler.Raise(new OrderEventArgs { Order = new Order("moq", 500) });
-		/// 
-		/// // Now the presenter reacted to the event, and we have a selected order
-		/// Assert.NotNull(presenter.SelectedOrder);
-		/// Assert.Equal("moq", presenter.SelectedOrder.ProductName);
-		/// </code>
-		/// </example>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.CreateEventHandler{TEventArgs}"]/*'/>
 		[EditorBrowsable(EditorBrowsableState.Never)] // TODO: remove on v3.5
 		public virtual MockedEvent<TEventArgs> CreateEventHandler<TEventArgs>() where TEventArgs : EventArgs
 		{
 			return new MockedEvent<TEventArgs>(this);
 		}
 
-		/// <summary>
-		/// Creates a handler that can be associated to an event receiving 
-		/// a generic <see cref="EventArgs"/> and can be used 
-		/// to raise the event.
-		/// </summary>
-		/// <example>
-		/// This example shows how to invoke a generic event in a view that will 
-		/// cause its corresponding presenter to react by changing its state:
-		/// <code>
-		/// var mockView = new Mock&lt;IOrdersView&gt;();
-		/// var mockedEvent = mockView.CreateEventHandler();
-		/// 
-		/// var presenter = new OrdersPresenter(mockView.Object);
-		/// 
-		/// // Check that the presenter is not in the "Canceled" state
-		/// Assert.False(presenter.IsCanceled);
-		/// 
-		/// // Create a mock event handler of the appropriate type
-		/// var handler = mockView.CreateEventHandler();
-		/// // Associate it with the event we want to raise
-		/// mockView.Object.Cancel += handler;
-		/// // Finally raise the event
-		/// handler.Raise(EventArgs.Empty);
-		/// 
-		/// // Now the presenter reacted to the event, and changed its state
-		/// Assert.True(presenter.IsCanceled);
-		/// </code>
-		/// </example>
+		/// <include file='Mock.xdoc' path='docs/doc[@for="Mock.CreateEventHandler"]/*'/>
 		[EditorBrowsable(EditorBrowsableState.Never)] // TODO: remove on v3.5
 		public virtual MockedEvent<EventArgs> CreateEventHandler()
 		{
