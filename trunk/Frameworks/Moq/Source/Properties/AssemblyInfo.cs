@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using System;
-using System.Runtime.InteropServices;
 using System.Resources;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Moq")]
 [assembly: AssemblyDescription("Mocking library for .NET 3.5 and C# 3.0, heavily based on Linq")]
@@ -10,7 +9,7 @@ using System.Resources;
 [assembly: AssemblyProduct("Moq")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("3.0.204.1")]
+[assembly: AssemblyVersion("3.0.222.4")]
 [assembly: AssemblyFileVersion("3.0.0.0")]
 
 [assembly: ComVisible(false)]

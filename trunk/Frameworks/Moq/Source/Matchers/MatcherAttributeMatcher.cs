@@ -40,10 +40,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Globalization;
 
 namespace Moq.Matchers
 {
@@ -90,7 +90,6 @@ namespace Moq.Matchers
 				var candidates =
 					from m in call.Method.DeclaringType.GetMethods(
 						BindingFlags.Public |
-						BindingFlags.NonPublic |
 						BindingFlags.Static |
 						BindingFlags.Instance)
 					where
@@ -110,7 +109,6 @@ namespace Moq.Matchers
 			{
 				method = call.Method.DeclaringType.GetMethod(call.Method.Name,
 						BindingFlags.Public |
-						BindingFlags.NonPublic |
 						BindingFlags.Static |
 						BindingFlags.Instance,
 						null, 

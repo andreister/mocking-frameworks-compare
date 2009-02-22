@@ -40,19 +40,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Castle.Core.Interceptor;
 using Moq.Language;
 using Moq.Language.Flow;
-using System.Globalization;
-using System.Diagnostics;
-using System.IO;
 
 namespace Moq
 {
 	internal class MethodCall<TMock> : MethodCall, ISetup<TMock>
+		where TMock : class
 	{
 		public MethodCall(Mock mock, Expression originalExpression, MethodInfo method, 
 			params Expression[] arguments)
@@ -60,7 +61,6 @@ namespace Moq
 		{
 		}
 
-#if !SILVERLIGHT
 		public IVerifies Raises(Action<TMock> eventExpression, EventArgs args)
 		{
 			return Raises(eventExpression, () => args);
@@ -90,7 +90,6 @@ namespace Moq
 		{
 			return RaisesImpl(eventExpression, func);
 		}
-#endif
 	}
 
 	internal class MethodCall : IProxyCall, ICallbackResult, IVerifies, IThrowsResult
@@ -163,6 +162,7 @@ namespace Moq
 			SetFileInfo();
 		}
 
+		[Conditional("DESKTOP")]
 		private void SetFileInfo()
 		{
 #if !SILVERLIGHT
@@ -460,10 +460,10 @@ namespace Moq
 			return this;
 		}
 
-#if !SILVERLIGHT
 		protected IVerifies RaisesImpl<TMock>(Action<TMock> eventExpression, Delegate func)
+			where TMock : class
 		{
-			var ev = eventExpression.GetEvent();
+			var ev = eventExpression.GetEvent((TMock)mock.Object);
 
 			mockEvent = new MockedEvent(mock);
 			mockEvent.Event = ev;
@@ -471,6 +471,5 @@ namespace Moq
 
 			return this;
 		}
-#endif
 	}
 }
