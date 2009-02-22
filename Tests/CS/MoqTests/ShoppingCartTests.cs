@@ -142,17 +142,25 @@ namespace MoqTests
         /// This needs a matcher method and a bool sibling method for evaluating the expectations.
         /// Calling this matcher is technically equivalent to <code>It.IsAny{string}()</code>.
         /// </summary>
-        [Matcher]
-        private static string Any() { return null; }
-        public static bool Any(string s) { return true; }
+        //[Matcher]
+        //private static string Any() { return null; }
+        //public static bool Any(string s) { return true; }
+        public Match<string> Any()
+        {
+            return new Match<string>(x => true);
+        }
 
         /// <summary>
         /// Parameter expectations tend to be quite verbose in Moq, so we provide a custom matcher.
         /// This needs a matcher method and a bool sibling method for evaluating the expectations.
         /// Calling this matcher is technically equivalent to <code>It.Is{string}(it => it.Equals("foo"))</code>.
         /// </summary>
-        [Matcher]
-        private static string Is(string test) { return null; }
-        public static bool Is(string s, string test) { return s.Equals(test); }
+        //[Matcher]
+        //private static string Is(string test) { return null; }
+        //public static bool Is(string s, string test) { return s.Equals(test); }
+        public Match<string> Is(string test)
+        {
+            return new Match<string>(x => x.Equals(test));
+        }
     }
 }
