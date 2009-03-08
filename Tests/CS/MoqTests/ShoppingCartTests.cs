@@ -43,7 +43,7 @@ namespace MoqTests
         public void Test2_MockedEvent()
         {
             var warehouse = new Mock<IWarehouse>();
-            warehouse.Setup(x => x.GetProducts(Any())).Callback(RaiseBadRequest(warehouse)).Returns(new List<Product>());
+            warehouse.Setup(x => x.GetProducts(Any)).Callback(RaiseBadRequest(warehouse)).Returns(new List<Product>());
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse.Object);
@@ -63,7 +63,7 @@ namespace MoqTests
             var cart = new ShoppingCart();
             cart.AddProductsIfWarehouseAvailable("foo", warehouse.Object);
 
-            warehouse.Verify(x => x.GetProducts(Any()), Times.Never());
+            warehouse.Verify(x => x.GetProducts(Any), Times.Never());
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace MoqTests
         public void Test4_MockedArgument()
         {
             var warehouse = new Mock<IWarehouse>();
-            warehouse.Setup(x => x.GetProducts(Any())).Returns(new List<Product>());
+            warehouse.Setup(x => x.GetProducts(Any)).Returns(new List<Product>());
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse.Object);
@@ -91,7 +91,7 @@ namespace MoqTests
         {
             var warehouse = new Mock<IWarehouse>();
             var cart = new Mock<ShoppingCart> { CallBase = true };
-            warehouse.Setup(x => x.GetProducts(Any())).Returns(DefaultProducts);
+            warehouse.Setup(x => x.GetProducts(Any)).Returns(DefaultProducts);
             cart.Setup(x => x.IsRed).Returns(true);
 
             cart.Object.AddProducts("foo", warehouse.Object);
@@ -142,12 +142,9 @@ namespace MoqTests
         /// This needs a matcher method and a bool sibling method for evaluating the expectations.
         /// Calling this matcher is technically equivalent to <code>It.IsAny{string}()</code>.
         /// </summary>
-        //[Matcher]
-        //private static string Any() { return null; }
-        //public static bool Any(string s) { return true; }
-        public Match<string> Any()
+        public string Any
         {
-            return new Match<string>(x => true);
+            get { return Match<string>.Create(x => true); }
         }
 
         /// <summary>
@@ -155,12 +152,9 @@ namespace MoqTests
         /// This needs a matcher method and a bool sibling method for evaluating the expectations.
         /// Calling this matcher is technically equivalent to <code>It.Is{string}(it => it.Equals("foo"))</code>.
         /// </summary>
-        //[Matcher]
-        //private static string Is(string test) { return null; }
-        //public static bool Is(string s, string test) { return s.Equals(test); }
-        public Match<string> Is(string test)
+        public string Is(string test)
         {
-            return new Match<string>(x => x.Equals(test));
+            return Match<string>.Create(x => x.Equals(test));
         }
     }
 }

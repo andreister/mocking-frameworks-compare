@@ -19,7 +19,7 @@ namespace MoqTests
         {
             var hand = new Mock<IHand>();
             var mouth = new Mock<IMouth>();
-            hand.Setup(x => x.TouchIron(HotIron())).Throws(new BurnException());
+            hand.Setup(x => x.TouchIron(HotIron)).Throws(new BurnException());
 
             var brain = new Brain(hand.Object, mouth.Object);
             brain.TouchIron(new Iron { IsHot = true });
@@ -32,12 +32,9 @@ namespace MoqTests
         /// This needs a matcher method and a bool sibling method for evaluating the expectations.
         /// Calling this matcher is technically equivalent to <code>It.Is{Iron}(i => i.IsHot)</code>.
         /// </summary>
-        //[Matcher]
-        //private static Iron HotIron() { return null; }
-        //public static bool HotIron(Iron iron) { return iron.IsHot; }
-        public Match<Iron> HotIron()
+        public Iron HotIron
         {
-            return new Match<Iron>(x => x.IsHot);
+            get { return Match<Iron>.Create(x => x.IsHot); }
         }
     }
 }
