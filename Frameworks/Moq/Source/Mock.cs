@@ -47,6 +47,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Moq.Properties;
 
 namespace Moq
 {
@@ -358,7 +359,7 @@ namespace Moq
 
 				var targetInterceptor = GetInterceptor(expression, mock);
 
-				targetInterceptor.AddCall(call, ExpectKind.Other);
+				targetInterceptor.AddCall(call, SetupKind.Other);
 
 				return call;
 			});
@@ -383,7 +384,7 @@ namespace Moq
 
 				var targetInterceptor = GetInterceptor(lambda, mock);
 
-				targetInterceptor.AddCall(call, ExpectKind.Other);
+				targetInterceptor.AddCall(call, SetupKind.Other);
 
 				return call;
 			});
@@ -413,7 +414,7 @@ namespace Moq
 
 					var targetInterceptor = GetInterceptor(expression, mock);
 
-					targetInterceptor.AddCall(call, ExpectKind.Other);
+					targetInterceptor.AddCall(call, SetupKind.Other);
 
 					return call;
 				}
@@ -429,26 +430,28 @@ namespace Moq
 				return SetupSetImpl<T1, SetterMethodCall<T1, TProperty>>(mock, setterExpression,
 					(m, expr, method, value) =>
 					{
-						var call = new SetterMethodCall<T1, TProperty>(m, expr, method, value);
-						m.Interceptor.AddCall(call, ExpectKind.PropertySet);
+						var call = new SetterMethodCall<T1, TProperty>(m, expr, method, value[0]);
+						m.Interceptor.AddCall(call, SetupKind.PropertySet);
 						return call;
 					});
 			});
 		}
 
-		internal static MethodCall<T1> SetupSet<T1>(Mock<T1> mock,
-			Action<T1> setterExpression)
+		internal static MethodCall<T1> SetupSet<T1>(Mock<T1> mock, Action<T1> setterExpression)
 			where T1 : class
 		{
 			return PexProtector.Invoke(() =>
 			{
-				return SetupSetImpl<T1, MethodCall<T1>>(mock, setterExpression,
-					(m, expr, method, value) =>
+				return SetupSetImpl<T1, MethodCall<T1>>(
+					mock,
+					setterExpression,
+					(m, expr, method, values) =>
 					{
-						var call = new MethodCall<T1>(m, expr, method, value);
-						m.Interceptor.AddCall(call, ExpectKind.PropertySet);
+						var call = new MethodCall<T1>(m, expr, method, values);
+						m.Interceptor.AddCall(call, SetupKind.PropertySet);
 						return call;
 					});
+
 			});
 		}
 
@@ -465,13 +468,15 @@ namespace Moq
 			var call = new SetterMethodCall<T1, TProperty>(mock, expression, propSet);
 			var targetInterceptor = GetInterceptor(expression, mock);
 
-			targetInterceptor.AddCall(call, ExpectKind.PropertySet);
+			targetInterceptor.AddCall(call, SetupKind.PropertySet);
 
 			return call;
 		}
 
-		private static TCall SetupSetImpl<T1, TCall>(Mock<T1> mock,
-			Action<T1> setterExpression, Func<Mock, Expression, MethodInfo, Expression, TCall> callFactory)
+		private static TCall SetupSetImpl<T1, TCall>(
+			Mock<T1> mock,
+			Action<T1> setterExpression,
+			Func<Mock, Expression, MethodInfo, Expression[], TCall> callFactory)
 			where T1 : class
 			where TCall : MethodCall
 		{
@@ -480,59 +485,81 @@ namespace Moq
 				setterExpression(mock.Object);
 
 				var last = context.LastInvocation;
-
 				if (last == null)
-					throw new ArgumentException(String.Format(
-						CultureInfo.InvariantCulture, 
-						"SetupSet"));
+				{
+					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "SetupSet"));
+				}
 
 				var setter = last.Invocation.Method;
 				if (!setter.IsSpecialName || !setter.Name.StartsWith("set_"))
-					throw new ArgumentException(Properties.Resources.SetupNotSetter);
+				{
+					throw new ArgumentException(Resources.SetupNotSetter);
+				}
 
 				// No need to call ThrowIfCantOverride as non-overridable would have thrown above already.
 
 				var x = Expression.Parameter(last.Invocation.Method.DeclaringType, "x");
 
-				Expression value;
+				var arguments = last.Invocation.Arguments;
+				var parameters = setter.GetParameters();
+				var values = new Expression[arguments.Length];
+
 				if (last.Match == null)
 				{
-					value = last.Invocation.Arguments[0] != null &&
-						last.Invocation.Arguments[0].GetType() == setter.GetParameters()[0].ParameterType ?
-						(Expression)Expression.Constant(last.Invocation.Arguments[0]) :
-						// Add a cast if values do not match exactly (i.e. for Nullable<T>)
-						(Expression)Expression.Convert(
-							Expression.Constant(last.Invocation.Arguments[0]),
-							setter.GetParameters()[0].ParameterType);
+					// Length == 1 || Length == 2 (Indexer property)
+					for (int i = 0; i < arguments.Length; i++)
+					{
+						values[i] = GetValueExpression(arguments[i], parameters[i].ParameterType);
+					}
 
-					var lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(x.Type),
-						Expression.Call(
-							x,
-							last.Invocation.Method,
-							value),
+					var lambda = Expression.Lambda(
+						typeof(Action<>).MakeGenericType(x.Type),
+						Expression.Call(x, last.Invocation.Method, values),
 						x);
 
-					return callFactory(last.Mock, lambda, last.Invocation.Method, value);
+					return callFactory(last.Mock, lambda, last.Invocation.Method, values);
 				}
 				else
 				{
-					var matcherMethod = typeof(Match).GetMethod("Matcher", BindingFlags.Static | BindingFlags.NonPublic)
-						.MakeGenericMethod(last.Invocation.Method.GetParameters()[0].ParameterType);
-					var lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(x.Type),
-						Expression.Call(
-							x,
-							last.Invocation.Method, 
-							Expression.Call(matcherMethod)
-						), 
+					var matchers = new Expression[arguments.Length];
+					var valueIndex = arguments.Length - 1;
+
+					var matcherMethod = typeof(Match)
+						.GetMethod("Matcher", BindingFlags.Static | BindingFlags.NonPublic)
+						.MakeGenericMethod(parameters[valueIndex].ParameterType);
+					values[valueIndex] = Expression.Call(matcherMethod);
+					matchers[valueIndex] = new MatchExpression(last.Match);
+
+					if (arguments.Length == 2)
+					{
+						// Add the index value for the property indexer
+						values[0] = GetValueExpression(arguments[0], parameters[0].ParameterType);
+						// No matcher supported now for the index
+						matchers[0] = values[0];
+					}
+
+					var lambda = Expression.Lambda(
+						typeof(Action<>).MakeGenericType(x.Type),
+						Expression.Call(x, last.Invocation.Method, values),
 						x);
 
-					return callFactory(last.Mock, lambda, last.Invocation.Method, new MatchExpression(last.Match));
+					return callFactory(last.Mock, lambda, last.Invocation.Method, matchers);
 				}
 			}
 		}
 
+		private static Expression GetValueExpression(object value, Type type)
+		{
+			if (value != null && value.GetType() == type)
+			{
+				return Expression.Constant(value);
+			}
+
+			// Add a cast if values do not match exactly (i.e. for Nullable<T>)
+			return Expression.Convert(Expression.Constant(value), type);
+		}
+
 #if !SILVERLIGHT
-		[Conditional("DESKTOP")]
 		internal static void SetupAllProperties(Mock mock)
 		{
 			// Dunno why the conditional is not kicking in. I'm getting 

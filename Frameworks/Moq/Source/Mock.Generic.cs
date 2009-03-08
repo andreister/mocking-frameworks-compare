@@ -230,7 +230,6 @@ namespace Moq
 
 #if !SILVERLIGHT
 		/// <include file='Mock.Generic.xdoc' path='docs/doc[@for="Mock{T}.SetupAllProperties"]/*'/>
-		[Conditional("DESKTOP")]
 		public void SetupAllProperties()
 		{
 			SetupAllProperties(this);
@@ -434,6 +433,27 @@ namespace Moq
 		[SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Raises the event, rather than being one.")]
 		[SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "We want to reset the stack trace to avoid Moq noise in it.")]
 		public void Raise(Action<T> eventExpression, EventArgs args)
+		{
+			var ev = eventExpression.GetEvent(this.Object);
+
+			var me = new MockedEvent(this);
+			me.Event = ev;
+
+			try
+			{
+				me.DoRaise(args);
+			}
+			catch (Exception e)
+			{
+				// Reset stacktrace so user gets this call site only.
+				throw e;
+			}
+		}
+
+		/// <include file='Mock.Generic.xdoc' path='docs/doc[@for="Mock{T}.Raise(args)"]/*'/>
+		[SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Raises the event, rather than being one.")]
+		[SuppressMessage("Microsoft.Usage", "CA2200:RethrowToPreserveStackDetails", Justification = "We want to reset the stack trace to avoid Moq noise in it.")]
+		public void Raise(Action<T> eventExpression, params object[] args)
 		{
 			var ev = eventExpression.GetEvent(this.Object);
 

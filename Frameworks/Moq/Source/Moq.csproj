@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EmptyDefaultValueProvider.cs" />
-    <Compile Include="ExpectKind.cs" />
+    <Compile Include="SetupKind.cs" />
     <Compile Include="Language\Flow\IReturnsResult.cs" />
     <Compile Include="Language\IRaise.cs" />
     <Compile Include="MatcherAttribute.cs" />
@@ -142,6 +142,7 @@
     <None Include="..\Moq.snk">
       <Link>Moq.snk</Link>
     </None>
+    <None Include="It.xdoc" />
     <None Include="Match.xdoc" />
     <None Include="Mock.Generic.xdoc" />
     <None Include="Mock.xdoc" />
@@ -154,6 +155,7 @@
     <Compile Include="Matchers\Matcher.cs" />
     <Compile Include="Matchers\ParamArrayMatcher.cs" />
     <Compile Include="Matchers\RefMatcher.cs" />
+    <Compile Include="MethodCall.Legacy.cs" />
     <Compile Include="Mock.Generic.cs" />
     <Compile Include="Mock.Generic.Legacy.cs">
       <SubType>Code</SubType>
@@ -179,11 +181,10 @@
   <!-- TODO: create automatic drop project -->
   <!--<Import Project="$(ToolsDir)\MSBuild.Community.Tasks.Targets" />-->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release' ">
-    <CreateItem Include="@(ReferencePath)" Condition="'%(CopyLocal)'=='true'">
-      <Output TaskParameter="Include" ItemName="IlmergeAssemblies" />
-    </CreateItem>
-    <Exec Command="&quot;$(MSBuildProjectPath)..\Tools\Ilmerge.exe&quot; /internalize:&quot;$(MSBuildProjectPath)ilmerge.exclude&quot; /ndebug /keyfile:$(AssemblyOriginatorKeyFile) /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(IlmergeAssemblies->'&quot;%(FullPath)&quot;', ' ')" />
+    <Exec Command="&quot;$(MSBuildProjectPath)..\Tools\Ilmerge.exe&quot; /internalize:&quot;$(MSBuildProjectPath)ilmerge.exclude&quot; /ndebug /keyfile:$(AssemblyOriginatorKeyFile) /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(ReferenceCopyLocalPaths->'&quot;%(FullPath)&quot;', ' ')" />
     <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
+    <Delete Files="$(OutDir)Moq.dll.CodeAnalysisLog.xml" ContinueOnError="true" />
+    <Delete Files="$(OutDir)Moq.dll.lastcodeanalysissucceeded" ContinueOnError="true" />
   </Target>
   <ProjectExtensions>
     <VisualStudio>
