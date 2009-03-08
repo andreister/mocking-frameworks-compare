@@ -26,10 +26,10 @@ The project contains the following test scenarios:
 
 
 The following versions of the mocking frameworks are used:
-* Moq			3.0.204.1  (checked out 18.02.2009, revision #482)
-* NMock2		1.2.3262   (checked out 18.02.2009, revision #101)
-* Rhino Mocks		3.5.0.2041 (checked out 18.02.2009, revision #2041)
-* Isolator		5.1.2.0 
+* Moq:			3.0.307.1  (checked out 08.03.2009, revision #534)
+* NMock2:		1.2.3262   (checked out 18.02.2009, revision #101)
+* Rhino Mocks:	3.5.0.2041 (checked out 08.03.2009, revision #2086)
+* Isolator:		5.1.2.0 
 
 
 
@@ -37,8 +37,8 @@ The following versions of the mocking frameworks are used:
 Thanks for your interest, for more details refer to http://code.google.com/p/mocking-frameworks-compare/
 
 For downloading latest source code, 
-Moq:			svn co http://moq.googlecode.com/svn/trunk/ moq-read-only
-NMock2:			svn co https://nmock2.svn.sourceforge.net/svnroot/nmock2 nmock2
+Moq:		svn co http://moq.googlecode.com/svn/trunk/ moq-read-only
+NMock2:		svn co https://nmock2.svn.sourceforge.net/svnroot/nmock2 nmock2
 Rhino Mocks:	svn co https://svn.sourceforge.net/svnroot/rhino-tools/trunk/ rhino-tools 
 
 
