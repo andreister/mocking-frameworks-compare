@@ -6,6 +6,6 @@ Suggestions received so far:
 _Not sure I like this - the main purpose of the project is to teach newbies how to use "today" approaches, and legacy tricks would just confuse people. But time will tell. I'm going defer this idea and to get back to it later, when the project evolves to the point where we can talk about supporting legacy samples._
   * Gerry (Lowry) [http://groups.google.com/group/moqdisc/tree/browse_frm/thread/bb13508b9fb686d5/534d83cbe27914b8?rnum=1&_done=%2Fgroup%2Fmoqdisc%2Fbrowse_frm%2Fthread%2Fbb13508b9fb686d5%3F#doc_47f4ada25fa30b75  suggested] to go beyond C# and add code in VB and maybe other languages. *_Planned_*
 _If anyone would volunteer for porting the code to VB, it would be great. Likewise, Cobol.NET or L# or [http://www.dotnetpowered.com/languages.aspx anything else] is highly welcome! :)_ 
-  * Jonathan de Halleux [http://code.google.com/p/mocking-frameworks-compare/issues/detail?id=1 suggested] to cover [http://channel9.msdn.com/posts/Peli/Getting-started-with-Pex-in-Visual-Studio-2008/ Pex] as well. *_Planned_*
+  * Jonathan de Halleux [http://code.google.com/p/mocking-frameworks-compare/issues/detail?id=1 suggested] to cover [http://channel9.msdn.com/posts/Peli/Getting-started-with-Pex-in-Visual-Studio-2008/ Pex] as well. *_Started_*
 _Haven't heard of Pex at all - just looking into it right now_ 
   * Your suggestion :)
