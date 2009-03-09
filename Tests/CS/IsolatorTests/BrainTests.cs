@@ -19,7 +19,7 @@ namespace TypemockIsolatorTests
             Isolate.WhenCalled(() => hand.TouchIron(iron)).WillThrow(new BurnException());
 
             var brain = new Brain(hand, mouth);
-            brain.TouchIron(new Iron());
+            brain.TouchIron(iron);
 
             Isolate.Verify.WasCalledWithAnyArguments(() => mouth.Yell());
         }
