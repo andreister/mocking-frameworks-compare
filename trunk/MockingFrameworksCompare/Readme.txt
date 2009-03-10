@@ -48,5 +48,6 @@ Moq:		svn co http://moq.googlecode.com/svn/trunk/ moq-read-only
 NMock2:		svn co https://nmock2.svn.sourceforge.net/svnroot/nmock2 nmock2
 Rhino Mocks:	svn co https://svn.sourceforge.net/svnroot/rhino-tools/trunk/ rhino-tools 
 
+A free SVN client is available at http://www.sliksvn.com/en/download
 
 
