@@ -8,8 +8,8 @@
     <ProjectGuid>{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TypemockIsolatorTests</RootNamespace>
-    <AssemblyName>TypemockIsolatorTests</AssemblyName>
+    <RootNamespace>IsolatorTests</RootNamespace>
+    <AssemblyName>IsolatorTests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
