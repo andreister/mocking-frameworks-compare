@@ -16,7 +16,7 @@ namespace Performance
             var moq = new MoqTests.ShoppingCartTests();
             var rhino = new RhinoMocksTests.ShoppingCartTests();
             var nmock2 = new NMock2Tests.ShoppingCartTests();
-            var isolator = new TypemockIsolatorTests.ShoppingCartTests();
+            var isolator = new IsolatorTests.ShoppingCartTests();
             int result = 0;
 
             Console.WriteLine("\nMocking methods.");

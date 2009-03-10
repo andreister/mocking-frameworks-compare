@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using TypeMock.ArrangeActAssert;
 
-namespace TypemockIsolatorTests
+namespace IsolatorTests
 {
     [TestFixture]
     public class BrainTests

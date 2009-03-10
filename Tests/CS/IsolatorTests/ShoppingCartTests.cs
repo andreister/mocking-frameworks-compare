@@ -4,7 +4,7 @@ using NUnit.Framework;
 using TypeMock;
 using TypeMock.ArrangeActAssert;
 
-namespace TypemockIsolatorTests
+namespace IsolatorTests
 {
     /// <summary>
     /// As far as the goal is to compare the frameworks, the tests are named accordingly to a framework feature 
