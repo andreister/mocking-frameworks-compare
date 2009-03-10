@@ -9,6 +9,8 @@ Each test is written against every framework so you can easily compare syntax of
 and implications of using any of them. For educational purposes, source code of the frameworks
 if provided (apart from the Isolator which is a paid one - but you can download a 21 day trial).
 
+Also there is a Performance project that gives another dimension for comparison.
+
 The project contains the following test scenarios:
 
 	1. BrainSample. 
@@ -23,13 +25,18 @@ The project contains the following test scenarios:
 			* Test4_MockedArgument - mock a method for a specific argument only
 			* Test5_PartialMocks - mock only some methods/properties, and call original ones if they're not mocked
 			* Test6_RecursiveMocks - mock chains like "foo.Boo.Zoo.Goo()" without having to mock the intermediate types.
+			
+	3. Performance.
+		This project runs all tests from ShoppingCartSample in a sophisticated loop, and displays 
+		an average speed for some standard scenarios in each mocking framework. Performance is measured
+		based on CodeTimers, amazing approach from Vance Morrison (http://blogs.msdn.com/vancem/archive/2006/09/21/765648.aspx)
 
 
 The following versions of the mocking frameworks are used:
 * Moq:			3.0.307.1  (checked out 08.03.2009, revision #534)
 * NMock2:		1.2.3262   (checked out 18.02.2009, revision #101)
-* Rhino Mocks:	3.5.0.2041 (checked out 08.03.2009, revision #2086)
-* Isolator:		5.1.2.0 
+* Rhino Mocks:		3.5.0.2041 (checked out 08.03.2009, revision #2086)
+* Isolator:		5.2.1.0 
 
 
 
