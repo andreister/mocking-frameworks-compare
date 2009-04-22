@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E76459AF-22FE-4339-8F9C-4FEB301A58B7}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{D1ACBEFA-8906-4512-802E-082DE8A8FC25}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Performance</RootNamespace>
-    <AssemblyName>Performance</AssemblyName>
+    <RootNamespace>StubsTests</RootNamespace>
+    <AssemblyName>StubsTests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,37 +31,48 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Stubs.Framework">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Frameworks\Stubs\Microsoft.Stubs.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeTimers.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="BrainTests.cs" />
+    <Compile Include="MockingFrameworksCompare.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>MockingFrameworksCompare.stubx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShoppingCartTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IsolatorTests\IsolatorTests.csproj">
-      <Project>{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}</Project>
-      <Name>IsolatorTests %28Tests\CS\IsolatorTests%29</Name>
+    <ProjectReference Include="..\..\..\MockingFrameworksCompare\MockingFrameworksCompare.csproj">
+      <Project>{2778E9BB-1C23-45DF-A176-81E617578524}</Project>
+      <Name>MockingFrameworksCompare</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MoqTests\MoqTests.csproj">
-      <Project>{A9C00984-020E-4D27-9263-5D6CF546EB31}</Project>
-      <Name>MoqTests %28Tests\CS\MoqTests%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NMock2Tests\NMock2Tests.csproj">
-      <Project>{3150CB26-7DF5-4349-8358-082067113FBD}</Project>
-      <Name>NMock2Tests %28Tests\CS\NMock2Tests%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RhinoMocksTests\RhinoMocksTests.csproj">
-      <Project>{95E69837-48BB-42DF-8338-21F1C216C7BD}</Project>
-      <Name>RhinoMocksTests %28Tests\CS\RhinoMocksTests%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StubsTests\StubsTests.csproj">
-      <Project>{D1ACBEFA-8906-4512-802E-082DE8A8FC25}</Project>
-      <Name>StubsTests</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MockingFrameworksCompare.stubx">
+      <Generator>StubGenerator</Generator>
+      <LastGenOutput>MockingFrameworksCompare.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
