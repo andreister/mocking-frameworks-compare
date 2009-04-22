@@ -1,0 +1,645 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Stubs.Framework</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Stubs.Framework.IStub">
+            <summary>
+            A stub type.
+            </summary>
+            <remarks>
+            <para>
+            All generated stubs implement this interface which provides
+            a 'default' behavior service, through the <see cref="T:Microsoft.Stubs.Framework.StubFallbackBehavior"/> property.
+            </para>
+            <para>
+            When a method that is not stubbed is called, the current default stub is used.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Stubs.Framework.IStub.FallbackBehavior">
+            <summary>
+            Gets or sets the fallback stub behaviorn.
+            Common behaviors can be instantiated from the StubFallbackBehavior 
+            class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.IStubBehavior">
+            <summary>
+            An object that provides the default behavior of stubbed members
+            that have not been redefined.
+            </summary>
+            <remarks>
+            A default stub can be attached
+            to a stub through the <see cref="P:Microsoft.Stubs.Framework.IStub.FallbackBehavior"/>
+            property.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.IStubBehavior.Result``2(``0)">
+            <summary>
+            Gets the default result value of a stubbed method
+            </summary>
+            <typeparam name="TStub">The type of the stub.</typeparam>
+            <typeparam name="TResult">The type of the result.</typeparam>
+            <param name="stub">Stub instance, may be null for static methods.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.IStubBehavior.ValueAtReturn``2(``0,``1@)">
+            <summary>
+            Gets the value of an out parameter
+            </summary>
+            <typeparam name="TStub">The type of the stub.</typeparam>
+            <typeparam name="TResult">The type of the result.</typeparam>
+            <param name="stub">the stub instance</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.IStubBehavior.VoidResult``1(``0)">
+            <summary>
+            Executes the default behavior of a stubbed method
+            </summary>
+            <typeparam name="TStub">The type of the stub.</typeparam>
+            <param name="stub">Stub instance, may be null for static methods.</param>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubBase">
+            <summary>
+            Abstract base class for <see cref="T:Microsoft.Stubs.Framework.IStub"/> implementations.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubBase.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Stubs.Framework.StubBase"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubBase.InitializeLifetimeService">
+            <summary>
+            Initailize lifetime to null.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Stubs.Framework.StubBase.FallbackBehavior">
+            <summary>
+            Gets or sets the default stub implementation.
+            Returns DefaultStub.Current if not set.
+            </summary>
+            <value></value>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates">
+            <summary>
+            A repository of stub delegate signatures.
+            </summary>
+            <remarks>
+            The stub framework currently only supports
+            the method signature covered by the delegate nested in <see cref="T:Microsoft.Stubs.Framework.StubDelegates"/>.
+            This includes methods with up to 10 parameter with or without return value,
+            with or without a out/ref parameter as the last parameter.
+            Pointers are not supported.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action">
+            <summary>
+            An action that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`1">
+            <summary>
+            An action that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`2">
+            <summary>
+            An action that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`3">
+            <summary>
+            An action that takes 3 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`4">
+            <summary>
+            An action that takes 4 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`5">
+            <summary>
+            An action that takes 5 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`6">
+            <summary>
+            An action that takes 6 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`7">
+            <summary>
+            An action that takes 7 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`8">
+            <summary>
+            An action that takes 8 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`9">
+            <summary>
+            An action that takes 9 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Action`10">
+            <summary>
+            An action that takes 10 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`1">
+            <summary>
+            An OutAction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`2">
+            <summary>
+            An OutAction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`3">
+            <summary>
+            An OutAction that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`4">
+            <summary>
+            An OutAction that takes 3 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`5">
+            <summary>
+            An OutAction that takes 4 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`6">
+            <summary>
+            An OutAction that takes 5 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`7">
+            <summary>
+            An OutAction that takes 6 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`8">
+            <summary>
+            An OutAction that takes 7 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`9">
+            <summary>
+            An OutAction that takes 8 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`10">
+            <summary>
+            An OutAction that takes 9 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutAction`11">
+            <summary>
+            An OutAction that takes 10 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`1">
+            <summary>
+            An RefAction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`2">
+            <summary>
+            An RefAction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`3">
+            <summary>
+            An RefAction that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`4">
+            <summary>
+            An RefAction that takes 3 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`5">
+            <summary>
+            An RefAction that takes 4 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`6">
+            <summary>
+            An RefAction that takes 5 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`7">
+            <summary>
+            An RefAction that takes 6 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`8">
+            <summary>
+            An RefAction that takes 7 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`9">
+            <summary>
+            An RefAction that takes 8 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`10">
+            <summary>
+            An RefAction that takes 9 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefAction`11">
+            <summary>
+            An RefAction that takes 10 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`1">
+            <summary>
+            An Function that takes no arguments
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`2">
+            <summary>
+            An Function that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`3">
+            <summary>
+            An Function that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`4">
+            <summary>
+            An Function that takes 3 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`5">
+            <summary>
+            An Function that takes 4 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`6">
+            <summary>
+            An Function that takes 5 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`7">
+            <summary>
+            An Function that takes 6 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`8">
+            <summary>
+            An Function that takes 7 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`9">
+            <summary>
+            An Function that takes 8 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`10">
+            <summary>
+            An Function that takes 9 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.Func`11">
+            <summary>
+            An Function that takes 10 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`2">
+            <summary>
+            An OutFunction that takes no arguments and 1 out argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`3">
+            <summary>
+            An OutFunction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`4">
+            <summary>
+            An OutFunction that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`5">
+            <summary>
+            An OutFunction that takes 3 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`6">
+            <summary>
+            An OutFunction that takes 4 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`7">
+            <summary>
+            An OutFunction that takes 5 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`8">
+            <summary>
+            An OutFunction that takes 6 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`9">
+            <summary>
+            An OutFunction that takes 7 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`10">
+            <summary>
+            An OutFunction that takes 8 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`11">
+            <summary>
+            An OutFunction that takes 9 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.OutFunc`12">
+            <summary>
+            An OutFunction that takes 10 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`2">
+            <summary>
+            An RefFunction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`3">
+            <summary>
+            An RefFunction that takes 1 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`4">
+            <summary>
+            An RefFunction that takes 2 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`5">
+            <summary>
+            An RefFunction that takes 3 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`6">
+            <summary>
+            An RefFunction that takes 4 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`7">
+            <summary>
+            An RefFunction that takes 5 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`8">
+            <summary>
+            An RefFunction that takes 6 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`9">
+            <summary>
+            An RefFunction that takes 7 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`10">
+            <summary>
+            An RefFunction that takes 8 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`11">
+            <summary>
+            An RefFunction that takes 9 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDelegates.RefFunc`12">
+            <summary>
+            An RefFunction that takes 10 argument
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDictionary">
+            <summary>
+            A lightweight dictionary of delegates, used to store stubs of generic methods.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubDictionary.TryGetValue``1(``0@)">
+            <summary>
+            Tries to get the delegate for a given type
+            </summary>
+            <typeparam name="TDelegate"></typeparam>
+            <param name="delegate"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubDictionary.One(System.Delegate)">
+            <summary>
+            Creates a dictionary with one element
+            </summary>
+            <param name="delegate"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubDictionary.Concat(Microsoft.Stubs.Framework.StubDictionary,System.Delegate)">
+            <summary>
+            Combines the @delegate into the existing dictionary dic
+            and returns a new copy.
+            </summary>
+            <param name="dic"></param>
+            <param name="delegate"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubDictionary.State">
+            <summary>
+            To avoid allocating a dictionary of delegates, 
+            we use the same field to store different 'collections
+            </summary>
+        </member>
+        <member name="F:Microsoft.Stubs.Framework.StubDictionary.State.Empty">
+            <summary>
+            No delegate is stored
+            </summary>
+        </member>
+        <member name="F:Microsoft.Stubs.Framework.StubDictionary.State.One">
+            <summary>
+            A single delegate is stored
+            </summary>
+        </member>
+        <member name="F:Microsoft.Stubs.Framework.StubDictionary.State.Dictionary">
+            <summary>
+            A dictionary of delegates is stored
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubExtensions">
+            <summary>
+            Specialized extensions to provide behaviors to stubs
+            </summary>
+            <summary>
+            Specialized extensions to provide behaviors to stubs
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.GetAsStub``2(``0,Microsoft.Stubs.Framework.StubDelegates.Func{``0},``0@)">
+            <summary>
+            Gets a stub instance and returns the getter if necessary. Use internally by the stubs
+            implementations
+            </summary>
+            <typeparam name="TStub"></typeparam>
+            <typeparam name="TActualStub"></typeparam>
+            <param name="stub"></param>
+            <param name="getter"></param>
+            <param name="newStub"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``1(Microsoft.Stubs.Framework.StubDelegates.Func{``0})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``2(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``3(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``4(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``5(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3,``4})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>        /// <typeparam name="T3"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``6(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3,``4,``5})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>        /// <typeparam name="T3"></typeparam>        /// <typeparam name="T4"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``7(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3,``4,``5,``6})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>        /// <typeparam name="T3"></typeparam>        /// <typeparam name="T4"></typeparam>        /// <typeparam name="T5"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``8(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3,``4,``5,``6,``7})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>        /// <typeparam name="T3"></typeparam>        /// <typeparam name="T4"></typeparam>        /// <typeparam name="T5"></typeparam>        /// <typeparam name="T6"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``9(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>        /// <typeparam name="T3"></typeparam>        /// <typeparam name="T4"></typeparam>        /// <typeparam name="T5"></typeparam>        /// <typeparam name="T6"></typeparam>        /// <typeparam name="T7"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubExtensions.Memoized``10(Microsoft.Stubs.Framework.StubDelegates.Func{``0,``1,``2,``3,``4,``5,``6,``7,``8,``9})">
+            <summary>
+            Memoizes (caches) the result of the stub
+            </summary>        /// <typeparam name="T0"></typeparam>        /// <typeparam name="T1"></typeparam>        /// <typeparam name="T2"></typeparam>        /// <typeparam name="T3"></typeparam>        /// <typeparam name="T4"></typeparam>        /// <typeparam name="T5"></typeparam>        /// <typeparam name="T6"></typeparam>        /// <typeparam name="T7"></typeparam>        /// <typeparam name="T8"></typeparam>         
+            <typeparam name="TResult"></typeparam>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubFallbackBehavior">
+            <summary>
+            Common fallback behaviors for stubs.
+            </summary>
+            <remarks>
+            <see cref="T:Microsoft.Stubs.Framework.IStubBehavior"/> instance define the
+            default behavior of stubbed method and properties when those members
+            have not been redefined by the user.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Stubs.Framework.StubFallbackBehavior.DefaultValue">
+            <summary>
+            Gets a default stub that always return the default type value (null, 0, etc...)
+            </summary>
+        </member>
+        <member name="P:Microsoft.Stubs.Framework.StubFallbackBehavior.NotImplemented">
+            <summary>
+            Gets a default stub that always throws a 
+            <see cref="T:Microsoft.Stubs.Framework.StubNotImplementedException"/> exception
+            </summary>
+        </member>
+        <member name="P:Microsoft.Stubs.Framework.StubFallbackBehavior.Current">
+            <summary>
+            Gets orsets the current default stub implementation. This instance
+            is used to intialize any stub instance.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Stubs.Framework.StubNotImplementedException">
+            <summary>
+            An exception thrown when a call was made to a stub method
+            which was not implemented. 
+            Change the default stub behavior or attach a delegate to
+            the event associated to the stub method.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubNotImplementedException.#ctor">
+            <summary>
+            Initializes a new instance of the exception
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubNotImplementedException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the exception
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubNotImplementedException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the exception
+            </summary>
+        </member>
+        <member name="M:Microsoft.Stubs.Framework.StubNotImplementedException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the exception
+            </summary>
+        </member>
+        <member name="T:__InstrumentAttribute">
+            <summary>
+            Types marked by an attribute of this type will be
+            instrumented.
+            </summary>
+            <remarks>
+            Note that the unmanaged profiler does not care where this attribute is defined; it simply looks for an attribute 
+            which has the name __InstrumentAttribute.
+            </remarks>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+This file is used by Microsoft.Stubs to generate stubs for all the interfaces in the assembly under test.
+-->
+<Stubs xmlns="http://schemas.microsoft.com/stubs/2008/">
+  <Assembly Name="MockingFrameworksCompare" />
+</Stubs>
