@@ -8,4 +8,5 @@ _Not sure I like this - the main purpose of the project is to teach newbies how 
 _Sounds like a great idea and if anyone would volunteer for porting the code to VB or any other language, it would be great. However, it seems that lack of lambdas in VB makes the port impossible._ 
   * Jonathan de Halleux [http://code.google.com/p/mocking-frameworks-compare/issues/detail?id=1 suggested] to cover [http://channel9.msdn.com/posts/Peli/Getting-started-with-Pex-in-Visual-Studio-2008/ Pex] as well. *_Done (zip to be ready in 1-2 days)_*
 _And ultimately Jonathan implemented it himself :) Great stuff!_ 
+  * Nat Pryce suggested to include test-failure diagnostics.
   * Your suggestion :)
