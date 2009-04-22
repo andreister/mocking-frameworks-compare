@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MockingFrameworksCompare.ShoppingCartSample;
 using NUnit.Framework;
 using MockingFrameworksCompare.ShoppingCartSample.Stubs;
@@ -53,7 +52,7 @@ namespace StubsTests
             var warehouse = new SIWarehouse();
             warehouse.GetProducts = p =>
             {
-                warehouse.SomethingWentWrong(warehouse, new WarehouseEventArgs() {BadRequest = true });
+                warehouse.SomethingWentWrong(warehouse, new WarehouseEventArgs {BadRequest = true });
                 return new List<Product>();
             };
 
