@@ -9,5 +9,5 @@ _Sounds like a great idea and if anyone would volunteer for porting the code to 
   * Jonathan de Halleux [http://code.google.com/p/mocking-frameworks-compare/issues/detail?id=1 suggested] to cover [http://channel9.msdn.com/posts/Peli/Getting-started-with-Pex-in-Visual-Studio-2008/ Pex] as well. *_Done (zip to be ready in 1-2 days)_*
 _And ultimately Jonathan implemented it himself :) Great stuff!_ 
   * Nat Pryce suggested to include test-failure diagnostics. *_Planned_*
-_Thinking on how to present this_ 
+_Thinking on how to present this._ 
   * Your suggestion :)
