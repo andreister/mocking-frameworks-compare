@@ -4,10 +4,13 @@
 The purpose of the project is to allow developers easily compare mocking frameworks available 
 for .NET, and make an informed decision when picking one up. 
 
-It provides a unified set of tests to showcase Moq, NMock2, Rhino Mocks and Typemock Isolator.
+It provides a unified set of tests to showcase Moq, NMock2, Rhino Mocks, Typemock Isolator and 
+a new star of mocking - Stubs framework from Microsoft Research.
+
 Each test is written against every framework so you can easily compare syntax of the frameworks 
 and implications of using any of them. For educational purposes, source code of the frameworks
-if provided (apart from the Isolator which is a paid one - but you can download a 21 day trial).
+if provided (apart from the Isolator which is a paid one - but you can download a 21 day trial -
+and Stubs which is free but not open source).
 
 Also there is a Performance project that gives another dimension for comparison.
 
@@ -23,7 +26,7 @@ The project contains the following test scenarios:
 			* Test2_MockedEvent - mock an event invocation
 			* Test3_MockedProperty - simply mock a property
 			* Test4_MockedArgument - mock a method for a specific argument only
-			* Test5_PartialMocks - mock only some methods/properties, and call original ones if they're not mocked
+			* Test5_PartialMocks - mock only some methods/properties, and call original ones if they're not mocked.
 			* Test6_RecursiveMocks - mock chains like "foo.Boo.Zoo.Goo()" without having to mock the intermediate types.
 			
 	3. Performance.
@@ -36,7 +39,8 @@ The following versions of the mocking frameworks are used:
 * Moq:			3.0.307.1  (checked out 08.03.2009, revision #534)
 * NMock2:		1.2.3262   (checked out 18.02.2009, revision #101)
 * Rhino Mocks:		3.5.0.2041 (checked out 08.03.2009, revision #2086)
-* Isolator:		5.2.1.0 
+* Isolator:		5.3.1.0 
+* Stubs:		0.11.40421.0
 
 
 
