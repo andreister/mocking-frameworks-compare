@@ -4,6 +4,11 @@
         <name>Microsoft.Stubs.Framework</name>
     </assembly>
     <members>
+        <member name="T:Microsoft.Stubs.Framework.IPartialStub">
+            <summary>
+            A stubs that inherits from an concrete class and overrides virtual methods
+            </summary>
+        </member>
         <member name="T:Microsoft.Stubs.Framework.IStub">
             <summary>
             A stub type.
@@ -23,6 +28,11 @@
             Gets or sets the fallback stub behaviorn.
             Common behaviors can be instantiated from the StubFallbackBehavior 
             class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Stubs.Framework.IPartialStub.CallBase">
+            <summary>
+            Gets or sets a value indicating whether the stub should call the base class method
             </summary>
         </member>
         <member name="T:Microsoft.Stubs.Framework.IStubBehavior">

@@ -115,11 +115,10 @@ namespace StubsTests
         /// here as well, just as a "byproduct").
         /// </summary>
         [Test]
-        [Ignore("not supported by stubs")]
         public void Test5_PartialMocks()
         {
             var warehouse = new SIWarehouse();
-            var cart = new SShoppingCart();
+            var cart = new SShoppingCart() { CallBase = true };
 
             warehouse.GetProducts = (p) => DefaultProducts;
             cart.IsRedGet = () => true;
