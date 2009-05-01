@@ -7,13 +7,14 @@
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of Brain</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = Brain")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SBrain
       : global::MockingFrameworksCompare.BrainSample.Brain
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SBrain</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -23,6 +24,21 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
         }
 
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
+        }
+
         /// <summary>Gets or sets the fallback behavior.</summary>
         public global::Microsoft.Stubs.Framework.IStubBehavior FallbackBehavior
         {
@@ -38,19 +54,22 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
             }
         }
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of BurnException</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = BurnException")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SBurnException
       : global::MockingFrameworksCompare.BrainSample.BurnException
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SBurnException</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -60,6 +79,21 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
         }
 
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
+        }
+
         /// <summary>Gets or sets the fallback behavior.</summary>
         public global::Microsoft.Stubs.Framework.IStubBehavior FallbackBehavior
         {
@@ -75,19 +109,22 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
             }
         }
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 {
     /// <summary>Stub of ContactDetails</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = ContactDetails")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SContactDetails
       : global::MockingFrameworksCompare.ShoppingCartSample.ContactDetails
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SContactDetails</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -95,6 +132,21 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
         {
             this.defaultStub =
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
+        }
+
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
         }
 
         /// <summary>Gets or sets the fallback behavior.</summary>
@@ -123,8 +175,9 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   return sh.Invoke();
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+                  if (this.callBase)
+                    return base.Name;
+                  global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior;
                   return stub.Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
                     .SContactDetails, string>(this);
                 }
@@ -138,10 +191,15 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   sh.Invoke(value);
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
-                  stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
-                    .SContactDetails>(this);
+                  if (this.callBase)
+                    base.Name = value;
+                  else 
+                  {
+                    global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior
+                      ;
+                    stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
+                      .SContactDetails>(this);
+                  }
                 }
             }
         }
@@ -152,19 +210,22 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
         /// <summary>Stub of method System.Void MockingFrameworksCompare.ShoppingCartSample.ContactDetails.set_Name(System.String value)</summary>
         public global::Microsoft.Stubs.Framework.StubDelegates.Action<string> NameSet;
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of Hand</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = Hand")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SHand
       : global::MockingFrameworksCompare.BrainSample.Hand
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SHand</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -172,6 +233,21 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
         {
             this.defaultStub =
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
+        }
+
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
         }
 
         /// <summary>Gets or sets the fallback behavior.</summary>
@@ -189,13 +265,15 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
             }
         }
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of IHand</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = IHand")]
     [global::System.Diagnostics.DebuggerStepThrough]
@@ -220,8 +298,7 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
               sh.Invoke(iron);
             else 
             {
-              global::Microsoft.Stubs.Framework.IStubBehavior stub
-                 = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+              global::Microsoft.Stubs.Framework.IStubBehavior stub = base.FallbackBehavior;
               stub.VoidResult<global::MockingFrameworksCompare.BrainSample.Stubs.SIHand>
                   (this);
             }
@@ -234,7 +311,7 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of IMouth</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = IMouth")]
     [global::System.Diagnostics.DebuggerStepThrough]
@@ -257,8 +334,7 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
               sh.Invoke();
             else 
             {
-              global::Microsoft.Stubs.Framework.IStubBehavior stub
-                 = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+              global::Microsoft.Stubs.Framework.IStubBehavior stub = base.FallbackBehavior;
               stub.VoidResult<global::MockingFrameworksCompare.BrainSample.Stubs.SIMouth>
                   (this);
             }
@@ -271,7 +347,7 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
 namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 {
     /// <summary>Stub of IWarehouse</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = IWarehouse")]
     [global::System.Diagnostics.DebuggerStepThrough]
@@ -300,8 +376,7 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   return sh.Invoke();
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+                  global::Microsoft.Stubs.Framework.IStubBehavior stub = base.FallbackBehavior;
                   return stub.Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
                     .SIWarehouse, bool>(this);
                 }
@@ -326,8 +401,7 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
               return sh.Invoke(name);
             else 
             {
-              global::Microsoft.Stubs.Framework.IStubBehavior stub
-                 = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+              global::Microsoft.Stubs.Framework.IStubBehavior stub = base.FallbackBehavior;
               return stub.Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
                 .SIWarehouse, global::System.Collections.Generic.List<
               global::MockingFrameworksCompare.ShoppingCartSample
@@ -364,13 +438,14 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of Iron</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = Iron")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SIron
       : global::MockingFrameworksCompare.BrainSample.Iron
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SIron</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -380,6 +455,21 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
         }
 
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
+        }
+
         /// <summary>Gets or sets the fallback behavior.</summary>
         public global::Microsoft.Stubs.Framework.IStubBehavior FallbackBehavior
         {
@@ -395,19 +485,22 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
             }
         }
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.BrainSample.Stubs
 {
     /// <summary>Stub of Mouth</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = Mouth")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SMouth
       : global::MockingFrameworksCompare.BrainSample.Mouth
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SMouth</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -417,6 +510,21 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
         }
 
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
+        }
+
         /// <summary>Gets or sets the fallback behavior.</summary>
         public global::Microsoft.Stubs.Framework.IStubBehavior FallbackBehavior
         {
@@ -432,19 +540,22 @@ namespace MockingFrameworksCompare.BrainSample.Stubs
             }
         }
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 {
     /// <summary>Stub of ShoppingCart</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = ShoppingCart")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SShoppingCart
       : global::MockingFrameworksCompare.ShoppingCartSample.ShoppingCart
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SShoppingCart</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -467,10 +578,15 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
               sh.Invoke(name, warehouse);
             else 
             {
-              global::Microsoft.Stubs.Framework.IStubBehavior stub
-                 = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
-              stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
-                .SShoppingCart>(this);
+              if (this.callBase)
+                base.AddProducts(name, warehouse);
+              else 
+              {
+                global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior
+                  ;
+                stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
+                  .SShoppingCart>(this);
+              }
             }
         }
 
@@ -487,10 +603,15 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
               sh.Invoke(name, warehouse);
             else 
             {
-              global::Microsoft.Stubs.Framework.IStubBehavior stub
-                 = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
-              stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
-                .SShoppingCart>(this);
+              if (this.callBase)
+                base.AddProductsIfWarehouseAvailable(name, warehouse);
+              else 
+              {
+                global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior
+                  ;
+                stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
+                  .SShoppingCart>(this);
+              }
             }
         }
 
@@ -499,6 +620,21 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 
         /// <summary>Stub of method System.Void MockingFrameworksCompare.ShoppingCartSample.ShoppingCart.AddProducts(System.String name, MockingFrameworksCompare.ShoppingCartSample.IWarehouse warehouse)</summary>
         public global::Microsoft.Stubs.Framework.StubDelegates.Action<string, global::MockingFrameworksCompare.ShoppingCartSample.IWarehouse> AddProductsStringIWarehouse;
+
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
+        }
 
         /// <summary>Gets or sets the fallback behavior.</summary>
         public global::Microsoft.Stubs.Framework.IStubBehavior FallbackBehavior
@@ -525,8 +661,9 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
               return sh.Invoke();
             else 
             {
-              global::Microsoft.Stubs.Framework.IStubBehavior stub
-                 = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+              if (this.callBase)
+                return base.GetProductsCount();
+              global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior;
               return stub.Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
                 .SShoppingCart, int>(this);
             }
@@ -546,8 +683,9 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   return sh.Invoke();
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+                  if (this.callBase)
+                    return base.IsRed;
+                  global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior;
                   return stub.Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
                     .SShoppingCart, bool>(this);
                 }
@@ -560,10 +698,15 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   sh.Invoke(value);
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
-                  stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
-                    .SShoppingCart>(this);
+                  if (this.callBase)
+                    base.IsRed = value;
+                  else 
+                  {
+                    global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior
+                      ;
+                    stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
+                      .SShoppingCart>(this);
+                  }
                 }
             }
         }
@@ -589,8 +732,9 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   return sh.Invoke();
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+                  if (this.callBase)
+                    return base.User;
+                  global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior;
                   return stub.Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
                     .SShoppingCart, 
                   global::MockingFrameworksCompare.ShoppingCartSample.User>(this);
@@ -608,10 +752,15 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   sh.Invoke(value);
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
-                  stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
-                    .SShoppingCart>(this);
+                  if (this.callBase)
+                    base.User = value;
+                  else 
+                  {
+                    global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior
+                      ;
+                    stub.VoidResult<global::MockingFrameworksCompare.ShoppingCartSample.Stubs
+                      .SShoppingCart>(this);
+                  }
                 }
             }
         }
@@ -621,7 +770,7 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 
         /// <summary>Gets an instance of TStub and assigns it as the delegate of get_User</summary>
         public TStub UserGetAsStub<TStub>()
-            where TStub : global::MockingFrameworksCompare.ShoppingCartSample.User, global::Microsoft.Stubs.Framework.IStub, new()
+            where TStub : global::MockingFrameworksCompare.ShoppingCartSample.User, new()
         {
             this.UserGet = global::Microsoft.Stubs.Framework.StubExtensions
               .GetAsStub<global::MockingFrameworksCompare.ShoppingCartSample.User, TStub>
@@ -634,19 +783,22 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 
         private global::MockingFrameworksCompare.ShoppingCartSample.User _UserGetAsStub;
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 {
     /// <summary>Stub of User</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = User")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SUser
       : global::MockingFrameworksCompare.ShoppingCartSample.User
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SUser</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -654,6 +806,21 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
         {
             this.defaultStub =
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
+        }
+
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
         }
 
         /// <summary>Stub of property MockingFrameworksCompare.ShoppingCartSample.User.ContactDetails</summary>
@@ -671,8 +838,9 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   return sh.Invoke();
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
+                  if (this.callBase)
+                    return base.ContactDetails;
+                  global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior;
                   return stub
                     .Result<global::MockingFrameworksCompare.ShoppingCartSample.Stubs.SUser, 
                     global::MockingFrameworksCompare.ShoppingCartSample.ContactDetails>(this);
@@ -690,10 +858,15 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                   sh.Invoke(value);
                 else 
                 {
-                  global::Microsoft.Stubs.Framework.IStubBehavior stub
-                     = ((global::Microsoft.Stubs.Framework.IStub)this).FallbackBehavior;
-                  stub.VoidResult
-                      <global::MockingFrameworksCompare.ShoppingCartSample.Stubs.SUser>(this);
+                  if (this.callBase)
+                    base.ContactDetails = value;
+                  else 
+                  {
+                    global::Microsoft.Stubs.Framework.IStubBehavior stub = this.FallbackBehavior
+                      ;
+                    stub.VoidResult
+                        <global::MockingFrameworksCompare.ShoppingCartSample.Stubs.SUser>(this);
+                  }
                 }
             }
         }
@@ -703,7 +876,7 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 
         /// <summary>Gets an instance of TStub and assigns it as the delegate of get_ContactDetails</summary>
         public TStub ContactDetailsGetAsStub<TStub>()
-            where TStub : global::MockingFrameworksCompare.ShoppingCartSample.ContactDetails,global::Microsoft.Stubs.Framework.IStub, new()
+            where TStub : global::MockingFrameworksCompare.ShoppingCartSample.ContactDetails, new()
         {
             this.ContactDetailsGet =
               global::Microsoft.Stubs.Framework.StubExtensions.GetAsStub
@@ -733,19 +906,22 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 
         private global::MockingFrameworksCompare.ShoppingCartSample.ContactDetails _ContactDetailsGetAsStub;
 
+        private bool callBase;
+
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }
 }
 namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
 {
     /// <summary>Stub of WarehouseEventArgs</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.1.2.3")]
+    [global::System.CodeDom.Compiler.GeneratedCode("Stubs", "0.12.40430.3")]
     [global::System.Serializable]
     [global::System.Diagnostics.DebuggerDisplay("Stub = WarehouseEventArgs")]
     [global::System.Diagnostics.DebuggerStepThrough]
     public partial class SWarehouseEventArgs
       : global::MockingFrameworksCompare.ShoppingCartSample.WarehouseEventArgs
       , global::Microsoft.Stubs.Framework.IStub
+      , global::Microsoft.Stubs.Framework.IPartialStub
     {
         /// <summary>Initializes a new instance of type SWarehouseEventArgs</summary>
         [global::System.Diagnostics.DebuggerHidden]
@@ -753,6 +929,21 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
         {
             this.defaultStub =
               global::Microsoft.Stubs.Framework.StubFallbackBehavior.Current;
+        }
+
+        /// <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        public bool CallBase
+        {
+            [global::System.Diagnostics.DebuggerHidden]
+            get
+            {
+                return this.callBase;
+            }
+            [global::System.Diagnostics.DebuggerHidden]
+            set
+            {
+                this.callBase = value;
+            }
         }
 
         /// <summary>Gets or sets the fallback behavior.</summary>
@@ -769,6 +960,8 @@ namespace MockingFrameworksCompare.ShoppingCartSample.Stubs
                 this.defaultStub = value;
             }
         }
+
+        private bool callBase;
 
         private global::Microsoft.Stubs.Framework.IStubBehavior defaultStub;
     }

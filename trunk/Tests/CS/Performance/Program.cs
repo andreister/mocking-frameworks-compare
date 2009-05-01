@@ -52,7 +52,7 @@ namespace Performance
             timer.Measure("Moq      ", () => { moq.Test5_PartialMocks(); result = 1; });
             timer.Measure("Rhino    ", () => { rhino.Test5_PartialMocks(); result = 2; });
             timer.Measure("Isolator ", () => { isolator.Test5_PartialMocks(); result = 3; });
-            //timer.Measure("Stubs ", () => { stubs.Test5_PartialMocks(); result = 5; });
+            timer.Measure("Stubs ", () => { stubs.Test5_PartialMocks(); result = 5; });
 
             Console.WriteLine("\nRecursive mocks.");
             timer.Measure("Moq      ", () => { moq.Test6_RecursiveMocks(); result = 1; });
