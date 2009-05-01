@@ -40,7 +40,7 @@ The following versions of the mocking frameworks are used:
 * NMock2:		1.2.3262   (checked out 18.02.2009, revision #101)
 * Rhino Mocks:		3.5.0.2041 (checked out 08.03.2009, revision #2086)
 * Isolator:		5.3.1.0 
-* Stubs:		0.11.40421.0
+* Stubs:		0.12.40430.3
 
 
 
