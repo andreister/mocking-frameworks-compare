@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrainTests.cs" />
+    <Compile Include="FailingTests.cs" />
     <Compile Include="MockingFrameworksCompare.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
