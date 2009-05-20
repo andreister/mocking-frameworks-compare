@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{4D084F2A-ABC5-4ED1-A898-9BAE2C50562E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IsolatorTests</RootNamespace>
-    <AssemblyName>IsolatorTests</AssemblyName>
+    <RootNamespace>FailureDiagnostics</RootNamespace>
+    <AssemblyName>FailureDiagnostics</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -21,7 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,35 +31,35 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="TypeMock, Version=5.1.2.0, Culture=neutral, PublicKeyToken=3dae460033b8d8e2, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\TypeMock.dll</HintPath>
-    </Reference>
-    <Reference Include="Typemock.ArrangeActAssert, Version=5.1.2.0, Culture=neutral, PublicKeyToken=3dae460033b8d8e2, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libs\Typemock.ArrangeActAssert.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FailingTests.cs" />
-    <Compile Include="ShoppingCartTests.cs" />
-    <Compile Include="BrainTests.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MockingFrameworksCompare\MockingFrameworksCompare.csproj">
-      <Project>{2778E9BB-1C23-45DF-A176-81E617578524}</Project>
-      <Name>MockingFrameworksCompare</Name>
+    <ProjectReference Include="..\Tests\CS\IsolatorTests\IsolatorTests.csproj">
+      <Project>{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}</Project>
+      <Name>IsolatorTests %28Tests\CS\IsolatorTests%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tests\CS\MoqTests\MoqTests.csproj">
+      <Project>{A9C00984-020E-4D27-9263-5D6CF546EB31}</Project>
+      <Name>MoqTests %28Tests\CS\MoqTests%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tests\CS\NMock2Tests\NMock2Tests.csproj">
+      <Project>{3150CB26-7DF5-4349-8358-082067113FBD}</Project>
+      <Name>NMock2Tests %28Tests\CS\NMock2Tests%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tests\CS\RhinoMocksTests\RhinoMocksTests.csproj">
+      <Project>{95E69837-48BB-42DF-8338-21F1C216C7BD}</Project>
+      <Name>RhinoMocksTests %28Tests\CS\RhinoMocksTests%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tests\CS\StubsTests\StubsTests.csproj">
+      <Project>{D1ACBEFA-8906-4512-802E-082DE8A8FC25}</Project>
+      <Name>StubsTests</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

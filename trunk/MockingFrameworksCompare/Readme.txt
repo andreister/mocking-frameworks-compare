@@ -30,9 +30,12 @@ The project contains the following test scenarios:
 			* Test6_RecursiveMocks - mock chains like "foo.Boo.Zoo.Goo()" without having to mock the intermediate types.
 			
 	3. Performance.
-		This project runs all tests from ShoppingCartSample in a sophisticated loop, and displays 
-		an average speed for some standard scenarios in each mocking framework. Performance is measured
-		based on CodeTimers, amazing approach from Vance Morrison (http://blogs.msdn.com/vancem/archive/2006/09/21/765648.aspx)
+	   This project runs all tests from ShoppingCartSample in a sophisticated loop, and displays 
+	   an average speed for some standard scenarios in each mocking framework. Performance is measured
+	   based on CodeTimers, amazing approach from Vance Morrison (http://blogs.msdn.com/vancem/archive/2006/09/21/765648.aspx)
+		
+	4. FailingSample.
+	   This one reveals the differences in error messages that come from mockings frameworks.
 
 
 The following versions of the mocking frameworks are used:
