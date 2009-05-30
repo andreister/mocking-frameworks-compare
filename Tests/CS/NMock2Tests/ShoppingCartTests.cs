@@ -46,7 +46,7 @@ namespace NMock2Tests
             Expect.On(warehouse).Method("GetProducts").WithAnyArguments().Will(fireBadRequest, Return.Value(DefaultProducts));
             Expect.On(warehouse).EventAdd("SomethingWentWrong");
             Expect.On(warehouse).EventRemove("SomethingWentWrong"); 
-            Fire.On(warehouse).Event("SomethingWentWrong").With(new WarehouseEventArgs {BadRequest = true});
+            //Fire.On(warehouse).Event("SomethingWentWrong");//apparently we don't need to call this
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse);
