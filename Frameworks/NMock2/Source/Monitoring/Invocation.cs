@@ -23,6 +23,8 @@ namespace NMock2.Monitoring
     using System.Reflection;
     using System.Text;
 
+using NMock2.Internal;
+
     /// <summary>
     /// Represents the invocation of a method on an object (receiver).
     /// </summary>
@@ -114,7 +116,7 @@ namespace NMock2.Monitoring
         {
             try
             {
-                this.Result = this.Method.Invoke(otherReceiver, Parameters.AsArray);
+                this.Result = this.Method.Invoke(otherReceiver, this.Parameters.AsArray);
                 this.Parameters.MarkAllValuesAsSet();
             }
             catch (TargetInvocationException e)
@@ -129,7 +131,18 @@ namespace NMock2.Monitoring
         /// <param name="writer">The text writer the description is added to.</param>
         public void DescribeTo(TextWriter writer)
         {
-            writer.Write(this.Receiver.ToString());
+            // This should really be a mock object in most cases, but a few testcases
+            // seem to supply strings etc as a Receiver.
+            IMockObject mock = this.Receiver as IMockObject;
+
+            if (mock != null)
+            {
+                writer.Write(mock.MockName);
+            }
+            else
+            {
+                writer.Write(this.Receiver.ToString());
+            }
 
             if (this.MethodIsIndexerGetter())
             {

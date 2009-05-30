@@ -23,7 +23,7 @@ namespace NMock2.Monitoring
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
-    using NMock2.Internal;
+    using Internal;
 
     internal class MockObjectFactory
     {
@@ -36,11 +36,12 @@ namespace NMock2.Monitoring
         /// <param name="name">The name of the assembly to generate.</param>
         public MockObjectFactory(string name)
         {
-            AssemblyName name1 = new AssemblyName();
-            name1.Name = name;
+            AssemblyName assemblyName = new AssemblyName();
+            assemblyName.Name = name;
+            assemblyName.KeyPair = new StrongNameKeyPair(Properties.Resources.NMock2);
             this.moduleBuilder =
                 AppDomain.CurrentDomain.DefineDynamicAssembly(
-                    name1, AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                    assemblyName, AssemblyBuilderAccess.Run).DefineDynamicModule(name);
         }
 
         /// <summary>

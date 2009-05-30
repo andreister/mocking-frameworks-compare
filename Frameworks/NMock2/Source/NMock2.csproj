@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{79C78732-B34C-4429-B678-C8ADE5FB5BE1}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -13,7 +13,7 @@
     <AssemblyOriginatorKeyFile>NMock2.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
+    <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
   </PropertyGroup>
@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\NMock2.XML</DocumentationFile>
@@ -37,6 +37,14 @@
     <DocumentationFile>bin\Release\NMock2.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.DynamicProxy2, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\Castle.DynamicProxy2.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -48,6 +56,7 @@
     <Compile Include="Actions\CollectAction.cs" />
     <Compile Include="Actions\DelegateAction.cs" />
     <Compile Include="Actions\FireAction.cs" />
+    <Compile Include="Actions\GenericCollectAction.cs" />
     <Compile Include="Actions\LazyReturnAction.cs" />
     <Compile Include="Actions\ResultSynthesizer.cs" />
     <Compile Include="Actions\ReturnAction.cs" />
@@ -56,6 +65,7 @@
     <Compile Include="Actions\SetNamedParameterAction.cs" />
     <Compile Include="Actions\SignalAction.cs" />
     <Compile Include="Actions\ThrowAction.cs" />
+    <Compile Include="Internal\CompositeType.cs" />
     <Compile Include="Expect.cs" />
     <Compile Include="Fire.cs" />
     <Compile Include="Has.cs" />
@@ -83,6 +93,7 @@
     <Compile Include="Matchers\ElementMatcher.cs" />
     <Compile Include="Matchers\EqualMatcher.cs" />
     <Compile Include="Matchers\FieldMatcher.cs" />
+    <Compile Include="Matchers\GenericMatcher.cs" />
     <Compile Include="Matchers\GenericMethodTypeParametersMatcher.cs" />
     <Compile Include="Matchers\IndexGetterArgumentsMatcher.cs" />
     <Compile Include="Matchers\IndexSetterArgumentsMatcher.cs" />
@@ -96,14 +107,23 @@
     <Compile Include="Matchers\ToStringMatcher.cs" />
     <Compile Include="Matchers\TypeMatcher.cs" />
     <Compile Include="Mockery.cs" />
+    <Compile Include="MockStyle.cs" />
+    <Compile Include="Monitoring\CastleMockObjectFactory.cs" />
     <Compile Include="Monitoring\IInvokable.cs" />
+    <Compile Include="Monitoring\IMockObjectFactory.cs" />
+    <Compile Include="Monitoring\InterfaceOnlyMockObjectFactory.cs" />
     <Compile Include="Monitoring\Invocation.cs" />
     <Compile Include="Monitoring\Invoker.cs" />
-    <Compile Include="Monitoring\MockObjectFactory.cs" />
+    <Compile Include="Monitoring\MockObjectInterceptor.cs" />
     <Compile Include="Monitoring\MultiInterfaceFactory.cs" />
     <Compile Include="Monitoring\ParameterList.cs" />
     <Compile Include="Monitoring\ProxiedObjectIdentity.cs" />
     <Compile Include="Monitoring\ProxyInvokableAdapter.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Return.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="Stub.cs" />
@@ -123,6 +143,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NMock2.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -29,7 +29,20 @@ namespace NMock2.Syntax
         /// Defines the object that fires the event.
         /// </summary>
         /// <param name="o">The object firing the event.</param>
-        /// <returns>Event argument sytax defining the arguments passed to the event.</returns>
+        /// <returns>Event argument syntax defining the arguments passed to the event.</returns>
         IEventArgumentSyntax On(object o);
+    }
+
+    /// <summary>
+    /// Syntax for defining the event that is fired.
+    /// </summary>
+    public interface INewEventSyntax
+    {
+        /// <summary>
+        /// Defines the event to fire.
+        /// </summary>
+        /// <param name="eventName">Name of the event.</param>
+        /// <returns>Event argument syntax defining the arguments passed to the event.</returns>
+        IEventArgumentSyntax Event(string eventName);
     }
 }
