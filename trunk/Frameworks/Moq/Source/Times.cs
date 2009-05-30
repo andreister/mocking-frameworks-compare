@@ -158,7 +158,16 @@ namespace Moq
 			return new Times(c => c == 0, 0, 0, Resources.NoMatchingCallsNever);
 		}
 
-		internal string GetExceptionMessage(string failMessage, string expression)
+		/// <summary>
+		/// Specifies that a mocked method should be invoked exactly one time.
+		/// </summary>
+		/// <returns>An object defining the allowed number of invocations.</returns>
+		public static Times Once()
+		{
+			return new Times(c => c == 1, 1, 1, Resources.NoMatchingCallsOnce);
+		}
+
+		internal string GetExceptionMessage(string failMessage, string expression, int callCount)
 		{
 			return string.Format(
 				CultureInfo.CurrentCulture,
@@ -166,7 +175,8 @@ namespace Moq
 				failMessage,
 				expression,
 				this.from,
-				this.to);
+				this.to,
+				callCount);
 		}
 
 		internal bool Verify(int callCount)

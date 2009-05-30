@@ -49,13 +49,14 @@ using System.Reflection;
 using Castle.Core.Interceptor;
 using Moq.Language;
 using Moq.Language.Flow;
+using System.Text;
 
 namespace Moq
 {
 	internal class MethodCall<TMock> : MethodCall, ISetup<TMock>
 		where TMock : class
 	{
-		public MethodCall(Mock mock, Expression originalExpression, MethodInfo method, 
+		public MethodCall(Mock mock, Expression originalExpression, MethodInfo method,
 			params Expression[] arguments)
 			: base(mock, originalExpression, method, arguments)
 		{
@@ -153,15 +154,10 @@ namespace Moq
 					else
 						throw new NotSupportedException("Ref expression must evaluate to a constant value.");
 				}
-				else if (parameter.GetCustomAttribute<ParamArrayAttribute>(true) != null)
-				{
-					IMatcher matcher = new ParamArrayMatcher();
-					matcher.Initialize(argument);
-					argumentMatchers.Add(matcher);
-				}
 				else
 				{
-					argumentMatchers.Add(MatcherFactory.CreateMatcher(argument));
+					var isParamArray = parameter.GetCustomAttribute<ParamArrayAttribute>(true) != null;
+					argumentMatchers.Add(MatcherFactory.CreateMatcher(argument, isParamArray));
 				}
 			}
 
@@ -177,7 +173,7 @@ namespace Moq
 			var index = 0;
 
 			// Move 'till our own frame first
-			while (stack.GetFrame(index).GetMethod() != thisMethod 
+			while (stack.GetFrame(index).GetMethod() != thisMethod
 				&& index <= stack.FrameCount)
 			{
 				index++;
@@ -185,7 +181,6 @@ namespace Moq
 
 			// Move 'till we're at the entry point 
 			// into Moq API
-			// Move 'till our own frame first
 			while (stack.GetFrame(index).GetMethod().DeclaringType.Namespace.StartsWith("Moq")
 				&& index <= stack.FrameCount)
 			{
@@ -214,21 +209,24 @@ namespace Moq
 
 		public virtual bool Matches(IInvocation call)
 		{
-			var args = new List<object>();
 			var parameters = call.Method.GetParameters();
+			var args = new List<object>();
 			for (int i = 0; i < parameters.Length; i++)
 			{
 				if (!parameters[i].IsOut)
+				{
 					args.Add(call.Arguments[i]);
+				}
 			}
 
-			if (IsEqualMethodOrOverride(call) &&
-				argumentMatchers.Count == args.Count)
+			if (argumentMatchers.Count == args.Count && IsEqualMethodOrOverride(call))
 			{
 				for (int i = 0; i < argumentMatchers.Count; i++)
 				{
 					if (!argumentMatchers[i].Matches(args[i]))
+					{
 						return false;
+					}
 				}
 
 				return true;
@@ -250,25 +248,19 @@ namespace Moq
 			callCount++;
 
 			if (isOnce && callCount > 1)
-				throw new MockException(MockException.ExceptionReason.MoreThanOneCall,
-					String.Format(CultureInfo.CurrentCulture, 
-					Properties.Resources.MoreThanOneCall,
-					call.Format()));
-
+				throw new MockException(
+					MockException.ExceptionReason.MoreThanOneCall,
+					Times.Once().GetExceptionMessage(FailMessage, SetupExpression.ToStringFixed(), callCount));
 
 			if (IsNever)
-				throw new MockException(MockException.ExceptionReason.SetupNever,
-					String.Format(CultureInfo.CurrentCulture, 
-					Properties.Resources.SetupNever,
-					call.Format()));
-
+				throw new MockException(
+					MockException.ExceptionReason.SetupNever,
+					Times.Never().GetExceptionMessage(FailMessage, SetupExpression.ToStringFixed(), callCount));
 
 			if (expectedCallCount.HasValue && callCount > expectedCallCount)
-				throw new MockException(MockException.ExceptionReason.MoreThanNCalls,
-					String.Format(CultureInfo.CurrentCulture, 
-					Properties.Resources.MoreThanNCalls, expectedCallCount,
-					call.Format()));
-
+				throw new MockException(
+					MockException.ExceptionReason.MoreThanNCalls,
+					Times.AtMost(expectedCallCount.Value).GetExceptionMessage(FailMessage, SetupExpression.ToStringFixed(), callCount));
 
 			if (mockEvent != null)
 			{
@@ -364,7 +356,7 @@ namespace Moq
 
 		private static void ThrowParameterMismatch(ParameterInfo[] expected, ParameterInfo[] actual)
 		{
-			throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, 
+			throw new ArgumentException(String.Format(CultureInfo.CurrentCulture,
 				"Invalid callback. Setup on method with parameters ({0}) cannot invoke callback with parameters ({1}).",
 				String.Join(",", expected.Select(p => p.ParameterType.Name).ToArray()),
 				String.Join(",", actual.Select(p => p.ParameterType.Name).ToArray())
@@ -452,6 +444,32 @@ namespace Moq
 			mockEventArgsParams = args;
 
 			return this;
+		}
+
+		public override string ToString()
+		{
+			var message = new StringBuilder();
+
+			if (FailMessage != null)
+			{
+				message.Append(FailMessage).Append(": ");
+			}
+
+			var lambda = SetupExpression.PartialMatcherAwareEval().ToLambda();
+			var targetTypeName = lambda.Parameters[0].Type.Name;
+
+			message.Append(targetTypeName).Append(" ").Append(lambda.ToStringFixed());
+
+			if (TestMethod != null && FileName != null && FileLine != 0)
+			{
+				message.AppendFormat(
+					" ({0}() in {1}: line {2})",
+					TestMethod.Name,
+					FileName,
+					FileLine);
+			}
+
+			return message.ToString().Trim();
 		}
 	}
 }
