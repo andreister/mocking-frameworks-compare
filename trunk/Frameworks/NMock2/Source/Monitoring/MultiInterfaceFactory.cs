@@ -36,7 +36,8 @@ namespace NMock2.Monitoring
         {
             AssemblyName assemblyName = new AssemblyName();
             assemblyName.Name = name;
-            
+            assemblyName.KeyPair = new StrongNameKeyPair(Properties.Resources.NMock2);
+
             AssemblyBuilder assemblyBuilder =
                 AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(name);

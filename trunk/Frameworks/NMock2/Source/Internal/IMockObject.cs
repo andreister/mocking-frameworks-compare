@@ -19,14 +19,37 @@
 namespace NMock2.Internal
 {
     using System;
+    using System.Collections.Generic;
+    using System.Reflection;
 
     /// <summary>
     /// Interface for mocks.
     /// </summary>
     public interface IMockObject
     {
+        // Q: What happens if any of these members are also defined on class/interface to be mocked???
+        // - Implement explicitly?
+
+        /// <summary>
+        /// Gets the name of the mock instance. This is often used in error messages
+        /// to identify a specific mock instance.
+        /// </summary>
+        string MockName { get; }
+
+        /// <summary>
+        /// Determines if this mock has a particular method.
+        /// </summary>
+        /// <param name="methodMatcher">A Matcher to use in identifying the method.</param>
+        /// <returns>True if a matching method exists, otherwise false.</returns>
         bool HasMethodMatching(Matcher methodMatcher);
 
+        /// <summary>
+        /// Retrieves all matching methods on this mock. 
+        /// </summary>
+        /// <param name="methodMatcher">A Matcher to use in identifying the methods.</param>
+        /// <returns>A list of zero or more matching MethodInfo instances.</returns>
+        IList<MethodInfo> GetMethodsMatching(Matcher methodMatcher);
+        
         /// <summary>
         /// Adds an expectation to this mock.
         /// </summary>

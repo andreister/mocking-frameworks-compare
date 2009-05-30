@@ -77,4 +77,56 @@ namespace NMock2.Internal
             this.mock.RaiseEvent(this.eventName, args);
         }
     }
+
+    /// <summary>
+    /// Builder for event invocations.
+    /// </summary>
+    public class NewEventInvocationBuilder : INewEventSyntax, IEventArgumentSyntax
+    {
+        /// <summary>
+        /// Stores the event name to be mocked.
+        /// </summary>
+        private string eventName;
+
+        /// <summary>
+        /// Stores the mock when called in the On method.
+        /// </summary>
+        private IMockObject mock;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NewEventInvocationBuilder"/> class.
+        /// </summary>
+        /// <param name="mock">The mock.</param>
+        public NewEventInvocationBuilder(object mock)
+        {
+            if (!(mock is IMockObject))
+            {
+                throw new ArgumentException("Must be a mock object.");
+            }
+
+            this.mock = mock as IMockObject;
+        }
+
+        /// <summary>
+        /// Defines the event to fire.
+        /// </summary>
+        /// <param name="eventName">Name of the event.</param>
+        /// <returns>
+        /// Event argument syntax defining the arguments passed to the event.
+        /// </returns>
+        public IEventArgumentSyntax Event(string eventName)
+        {
+            this.eventName = eventName;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies the event arguments that are passed to the event and fires the event.
+        /// </summary>
+        /// <param name="args">The args to be passed to raise the event.</param>
+        public void With(params object[] args)
+        {
+            this.mock.RaiseEvent(this.eventName, args);
+        }
+    }
 }

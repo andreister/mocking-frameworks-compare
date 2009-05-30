@@ -29,6 +29,7 @@ namespace NMock2.Syntax
         /// <value>
         /// Match syntax to define a matcher for the object returned by the indexer.
         /// </value>
+        /// <param name="args">The arguments of the matcher.</param>
         IMatchSyntax this[params object[] args] 
         { 
             get; 

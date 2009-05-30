@@ -153,6 +153,29 @@ namespace NMock2
         {
             return new TypeMatcher(type);
         }
+
+        /// <summary>
+        /// Matches objects of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to match.</typeparam>
+        /// <returns>
+        /// Returns a new instance of the <see cref="TypeMatcher"/> class.
+        /// </returns>
+        public static Matcher TypeOf<T>()
+        {
+            return new TypeMatcher(typeof(T));
+        }
+
+        /// <summary>
+        /// Matches objects against the specified expression.
+        /// </summary>
+        /// <typeparam name="T">Type of the value to match.</typeparam>
+        /// <param name="expression">The match expression.</param>
+        /// <returns>returns a new instance of the <see cref="GenericMatcher{T}"/>.</returns>
+        public static Matcher Match<T>(GenericMatcher<T>.MatchExpression expression)
+        {
+            return new GenericMatcher<T>(expression);
+        }
     }
 }
 

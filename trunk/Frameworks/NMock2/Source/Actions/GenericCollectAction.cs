@@ -19,7 +19,7 @@
 namespace NMock2.Actions
 {
     using System.IO;
-    using NMock2.Monitoring;
+    using Monitoring;
 
     /// <summary>
     /// Action that calls the collect delegate passed to constructor with the n-th element of the arguments to an invocation.

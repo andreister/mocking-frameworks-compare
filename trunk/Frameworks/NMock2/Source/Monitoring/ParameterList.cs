@@ -27,7 +27,12 @@ namespace NMock2.Monitoring
         private MethodInfo method;
         private object[] values;
         private BitArray isValueSet;
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParameterList"/> class.
+        /// </summary>
+        /// <param name="method">The method.</param>
+        /// <param name="values">The values.</param>
         public ParameterList(MethodInfo method, object[] values)
         {
             this.method = method;
@@ -40,15 +45,15 @@ namespace NMock2.Monitoring
                 this.isValueSet[i] = !parameters[i].IsOut;
             }
         }
-        
+
         public int Count
         {
             get { return this.values.Length; }
         }
 
-        public bool IsValueSet(int i)
+        internal object[] AsArray
         {
-            return this.isValueSet[i];
+            get { return this.values; }
         }
 
         public object this[int i]
@@ -78,15 +83,15 @@ namespace NMock2.Monitoring
                 }
             }
         }
-        
+
+        public bool IsValueSet(int i)
+        {
+            return this.isValueSet[i];
+        }
+
         internal void MarkAllValuesAsSet()
         {
             this.isValueSet.SetAll(true);
-        }
-
-        internal object[] AsArray
-        {
-            get { return this.values; }
         }
 
         private bool CanValueBeSet(int i)
