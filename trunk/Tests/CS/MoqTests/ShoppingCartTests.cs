@@ -13,7 +13,7 @@ namespace MoqTests
     /// </summary>
     /// <remarks>
     /// Mostly, we mock <see cref="IWarehouse"/>. If instead we decided to mock a (not existing at the moment) 
-    /// class that implemented <see cref="IWarehouse"/>, we would have to make the methods virtual. The only 
+    /// CLASS that implemented <see cref="IWarehouse"/>, we would have to make the methods virtual. The only 
     /// framework that DOES NOT have this requirement - Typemock Isolator.
     /// </remarks>
     [TestFixture]

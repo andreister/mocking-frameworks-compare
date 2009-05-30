@@ -12,9 +12,7 @@ namespace NMock2Tests
     /// frameworks, so that it's easy to compare the same test written with NMock2 or Moq or Rhino Mocks or Isolator.
     /// </summary>
     /// <remarks>
-    /// Here we mock interfaces only - NMock2 cannot mock classes (yet). Also, as soon as NMock2 allows *only* Strict 
-    /// mocks (yet), *all* calls must be specified, so tests sometimes end up knowing a lot about inner implementation
-    /// of the system.
+    /// Here we mock interfaces only - NMock2 cannot mock classes (yet). 
     /// </remarks>
     [TestFixture]
     public class ShoppingCartTests
@@ -27,10 +25,8 @@ namespace NMock2Tests
         public void Test1_MockedMethod()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse));
+            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
             Expect.On(warehouse).Method("GetProducts").With("nail").Will(Return.Value(DefaultProducts));
-            Expect.On(warehouse).EventAdd("SomethingWentWrong"); 
-            Expect.On(warehouse).EventRemove("SomethingWentWrong"); 
 
             var cart = new ShoppingCart();
             cart.AddProducts("nail", warehouse);
@@ -45,12 +41,12 @@ namespace NMock2Tests
         public void Test2_MockedEvent()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse) mockery.NewMock(typeof(IWarehouse));
+            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse));
             var fireBadRequest = new FireAction("SomethingWentWrong", null, new WarehouseEventArgs { BadRequest = true });
             Expect.On(warehouse).Method("GetProducts").WithAnyArguments().Will(fireBadRequest, Return.Value(DefaultProducts));
             Expect.On(warehouse).EventAdd("SomethingWentWrong");
             Expect.On(warehouse).EventRemove("SomethingWentWrong"); 
-            Fire.Event("SomethingWentWrong").On(warehouse).With(new WarehouseEventArgs {BadRequest = true});
+            Fire.On(warehouse).Event("SomethingWentWrong").With(new WarehouseEventArgs {BadRequest = true});
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse);
@@ -65,7 +61,7 @@ namespace NMock2Tests
         public void Test3_MockedProperty()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse));
+            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
             Expect.On(warehouse).GetProperty("IsAvailable").Will(Return.Value(false)); 
             Expect.Never.On(warehouse).Method("GetProducts").WithAnyArguments();
 
@@ -80,10 +76,8 @@ namespace NMock2Tests
         public void Test4_MockedArgument()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse));
+            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
             Expect.On(warehouse).Method("GetProducts").With(Is.EqualTo("foo")).Will(Return.Value(DefaultProducts));
-            Expect.On(warehouse).EventAdd("SomethingWentWrong");
-            Expect.On(warehouse).EventRemove("SomethingWentWrong"); 
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse);
