@@ -41,23 +41,23 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tests\CS\IsolatorTests\IsolatorTests.csproj">
+    <ProjectReference Include="..\IsolatorTests\IsolatorTests.csproj">
       <Project>{38A5AC4F-8C4F-418F-9BE4-F8B9631B27F9}</Project>
       <Name>IsolatorTests %28Tests\CS\IsolatorTests%29</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tests\CS\MoqTests\MoqTests.csproj">
+    <ProjectReference Include="..\MoqTests\MoqTests.csproj">
       <Project>{A9C00984-020E-4D27-9263-5D6CF546EB31}</Project>
       <Name>MoqTests %28Tests\CS\MoqTests%29</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tests\CS\NMock2Tests\NMock2Tests.csproj">
+    <ProjectReference Include="..\NMock2Tests\NMock2Tests.csproj">
       <Project>{3150CB26-7DF5-4349-8358-082067113FBD}</Project>
       <Name>NMock2Tests %28Tests\CS\NMock2Tests%29</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tests\CS\RhinoMocksTests\RhinoMocksTests.csproj">
+    <ProjectReference Include="..\RhinoMocksTests\RhinoMocksTests.csproj">
       <Project>{95E69837-48BB-42DF-8338-21F1C216C7BD}</Project>
       <Name>RhinoMocksTests %28Tests\CS\RhinoMocksTests%29</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tests\CS\StubsTests\StubsTests.csproj">
+    <ProjectReference Include="..\StubsTests\StubsTests.csproj">
       <Project>{D1ACBEFA-8906-4512-802E-082DE8A8FC25}</Project>
       <Name>StubsTests</Name>
     </ProjectReference>

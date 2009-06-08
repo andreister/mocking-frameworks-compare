@@ -37,7 +37,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Performance", "Tests\CS\Per
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StubsTests", "Tests\CS\StubsTests\StubsTests.csproj", "{D1ACBEFA-8906-4512-802E-082DE8A8FC25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FailureDiagnostics", "FailureDiagnostics\FailureDiagnostics.csproj", "{4D084F2A-ABC5-4ED1-A898-9BAE2C50562E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FailureDiagnostics", "Tests\CS\FailureDiagnostics\FailureDiagnostics.csproj", "{4D084F2A-ABC5-4ED1-A898-9BAE2C50562E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
