@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using MockingFrameworksCompare.BrainSample;
+using MockingFrameworksCompare.ShoppingCartSample;
 using Moq;
+using NUnit.Framework;
 
 namespace MoqTests
 {
@@ -56,6 +59,20 @@ namespace MoqTests
 
             mouth.Verify(x => x.Yell(), "This is a meaningful custom message in case the expectation would fail, say, " +
                 "'mouth should yell if we touch a hot iron'."); //but we expect it
+        }
+
+        public void CallExpectedWithWrongParameters()
+        {
+            string expectedName = "nail";
+            string unexpectedName = "hammer";
+
+            var warehouse = new Mock<IWarehouse>();
+            warehouse.Setup(x => x.GetProducts(expectedName)).Returns(new List<Product>());
+
+            var cart = new ShoppingCart();
+            cart.AddProducts(unexpectedName, warehouse.Object);
+
+            warehouse.Verify(x => x.GetProducts(expectedName));
         }
     }
 }

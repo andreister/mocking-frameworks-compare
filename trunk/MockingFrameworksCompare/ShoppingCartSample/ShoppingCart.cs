@@ -30,7 +30,9 @@ namespace MockingFrameworksCompare.ShoppingCartSample
                 warehouse.SomethingWentWrong += Alarm;
                 
                 List<Product> products = warehouse.GetProducts(name);
-                products.ForEach(p => _products.Add(p));
+                if (products != null) {
+                    products.ForEach(p => _products.Add(p));
+                }
             }
             finally {
                 warehouse.SomethingWentWrong -= Alarm;

@@ -1,4 +1,6 @@
-﻿using MockingFrameworksCompare.BrainSample;
+﻿using System.Collections.Generic;
+using MockingFrameworksCompare.BrainSample;
+using MockingFrameworksCompare.ShoppingCartSample;
 using Rhino.Mocks;
 using Rhino.Mocks.Constraints;
 
@@ -49,17 +51,19 @@ namespace RhinoMocksTests
             mouth.VerifyAllExpectations();
         }
 
-        public void CallOnceExpectTwice()
+        public void CallExpectedWithWrongParameters()
         {
-            var hand = MockRepository.GenerateStub<IHand>();
-            var mouth = MockRepository.GenerateMock<IMouth>();
-            hand.Stub(h => h.TouchIron(null)).Constraints(Is.Matching<Iron>(i => i.IsHot)).Throw(new BurnException());
-            mouth.Expect(m => m.Yell()).Repeat.Twice();
+            string expectedName = "nail";
+            string unexpectedName = "hammer";
 
-            var brain = new Brain(hand, mouth);
-            brain.TouchIron(new Iron { IsHot = true });
+            //notice: in order for the test to fail if unexpected name is passed, we use GenerateMock, not GenerateStub
+            var warehouse = MockRepository.GenerateMock<IWarehouse>();
+            warehouse.Expect(x => x.GetProducts(expectedName)).Return(new List<Product>());
 
-            mouth.VerifyAllExpectations();
+            var cart = new ShoppingCart();
+            cart.AddProducts(unexpectedName, warehouse);
+
+            warehouse.VerifyAllExpectations();
         }
     }
 }

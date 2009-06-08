@@ -1,4 +1,6 @@
-﻿using MockingFrameworksCompare.BrainSample;
+﻿using System.Collections.Generic;
+using MockingFrameworksCompare.BrainSample;
+using MockingFrameworksCompare.ShoppingCartSample;
 using NMock2;
 
 namespace NMock2Tests
@@ -55,17 +57,17 @@ namespace NMock2Tests
             mockery.VerifyAllExpectationsHaveBeenMet();
         }
 
-        public void CallOnceExpectTwice()
+        public void CallExpectedWithWrongParameters()
         {
-            var mockery = new Mockery();
-            var hand = (IHand)mockery.NewMock(typeof(IHand));
-            var mouth = (IMouth)mockery.NewMock(typeof(IMouth));
-            var iron = new Iron { IsHot = true };
-            Expect.On(hand).Method("TouchIron").With(iron).Will(Throw.Exception(new BurnException()));
-            Expect.Exactly(2).On(mouth).Method("Yell"); 
+            string expectedName = "nail";
+            string unexpectedName = "hammer";
 
-            var brain = new Brain(hand, mouth);
-            brain.TouchIron(iron);
+            var mockery = new Mockery();
+            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
+            Expect.On(warehouse).Method("GetProducts").With(expectedName).Will(Return.Value(new List<Product>()));
+
+            var cart = new ShoppingCart();
+            cart.AddProducts(unexpectedName, warehouse);
 
             mockery.VerifyAllExpectationsHaveBeenMet();
         }
