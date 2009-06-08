@@ -1,4 +1,6 @@
 ﻿using MockingFrameworksCompare.BrainSample;
+using MockingFrameworksCompare.ShoppingCartSample;
+using NUnit.Framework;
 using TypeMock.ArrangeActAssert;
 
 namespace IsolatorTests
@@ -36,11 +38,20 @@ namespace IsolatorTests
 
         public void CallNeverExpectOnceCustom()
         {
+            Assert.Fail("Isolator does not allow custom messages.");
         }
 
-        public void CallOnceExpectTwice()
+        public void CallExpectedWithWrongParameters()
         {
+            string expectedName = "nail";
+            string unexpectedName = "hammer";
 
+            var warehouse = Isolate.Fake.Instance<IWarehouse>(); 
+            
+            var cart = new ShoppingCart();
+            cart.AddProducts(unexpectedName, warehouse);
+
+            Isolate.Verify.WasCalledWithExactArguments(() => warehouse.GetProducts(expectedName));
         }
     }
 }

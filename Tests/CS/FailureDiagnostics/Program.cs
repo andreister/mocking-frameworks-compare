@@ -11,13 +11,14 @@ namespace FailureDiagnostics
             var rhino = new RhinoMocksTests.FailingTests();
             var nmock2 = new NMock2Tests.FailingTests();
             var isolator = new IsolatorTests.FailingTests();
-            var stubs = new StubsTests.ShoppingCartTests();
+            var stubs = new StubsTests.FailingTests();
 
             Console.WriteLine("Case 1. Some unexpected method gets invoked.");
             Run("Moq      ", moq.CallOnceExpectNever);
             Run("Rhino    ", rhino.CallOnceExpectNever);
             Run("NMock2   ", nmock2.CallOnceExpectNever);
             Run("Isolator ", isolator.CallOnceExpectNever);
+            Run("Stubs    ", stubs.CallOnceExpectNever);
             Console.WriteLine("Press any key to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 2. Some expected method is not invoked.");
@@ -25,6 +26,7 @@ namespace FailureDiagnostics
             Run("Rhino    ", rhino.CallNeverExpectOnce);
             Run("NMock2   ", nmock2.CallNeverExpectOnce);
             Run("Isolator ", isolator.CallNeverExpectOnce);
+            Run("Stubs    ", stubs.CallNeverExpectOnce);
             Console.WriteLine("Press any key to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 3. Some expected method is not invoked - custom message.");
@@ -32,6 +34,14 @@ namespace FailureDiagnostics
             Run("Rhino    ", rhino.CallNeverExpectOnceCustom);
             Run("NMock2   ", nmock2.CallNeverExpectOnceCustom);
             Run("Isolator ", isolator.CallNeverExpectOnceCustom);
+            Run("Stubs    ", stubs.CallNeverExpectOnceCustom);
+
+            Console.WriteLine("Case 4. Expected method is invoked but parameters were incorrect.");
+            Run("Moq      ", moq.CallExpectedWithWrongParameters);
+            Run("Rhino    ", rhino.CallExpectedWithWrongParameters);
+            Run("NMock2   ", nmock2.CallExpectedWithWrongParameters);
+            Run("Isolator ", isolator.CallExpectedWithWrongParameters);
+            Run("Stubs    ", stubs.CallExpectedWithWrongParameters);
         }
 
         #region Console colored output
