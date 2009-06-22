@@ -1,7 +1,7 @@
 ﻿using MockingFrameworksCompare.BrainSample;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Rhino.Mocks.Constraints;
+using Is=Rhino.Mocks.Constraints.Is;
 
 namespace RhinoMocksTests
 {
