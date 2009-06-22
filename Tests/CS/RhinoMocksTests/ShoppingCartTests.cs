@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MockingFrameworksCompare.ShoppingCartSample;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Rhino.Mocks.Constraints;
+using Is=Rhino.Mocks.Constraints.Is;
 
 namespace RhinoMocksTests
 {

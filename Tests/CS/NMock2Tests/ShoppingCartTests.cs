@@ -3,6 +3,7 @@ using MockingFrameworksCompare.ShoppingCartSample;
 using NMock2;
 using NMock2.Actions;
 using NUnit.Framework;
+using Is=NUnit.Framework.Is;
 
 namespace NMock2Tests
 {
