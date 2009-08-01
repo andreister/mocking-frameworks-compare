@@ -26,7 +26,7 @@ namespace NMock2Tests
         public void Test1_MockedMethod()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
+            var warehouse = mockery.NewMock<IWarehouse>(MockStyle.Stub);
             Expect.On(warehouse).Method("GetProducts").With("nail").Will(Return.Value(DefaultProducts));
 
             var cart = new ShoppingCart();
@@ -42,12 +42,9 @@ namespace NMock2Tests
         public void Test2_MockedEvent()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse));
+            var warehouse = mockery.NewMock<IWarehouse>(MockStyle.Stub);
             var fireBadRequest = new FireAction("SomethingWentWrong", null, new WarehouseEventArgs { BadRequest = true });
             Expect.On(warehouse).Method("GetProducts").WithAnyArguments().Will(fireBadRequest, Return.Value(DefaultProducts));
-            Expect.On(warehouse).EventAdd("SomethingWentWrong");
-            Expect.On(warehouse).EventRemove("SomethingWentWrong"); 
-            //Fire.On(warehouse).Event("SomethingWentWrong");//apparently we don't need to call this
 
             var cart = new ShoppingCart();
             cart.AddProducts("foo", warehouse);
@@ -62,7 +59,7 @@ namespace NMock2Tests
         public void Test3_MockedProperty()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
+            var warehouse = mockery.NewMock<IWarehouse>(MockStyle.Stub);
             Expect.On(warehouse).GetProperty("IsAvailable").Will(Return.Value(false)); 
             Expect.Never.On(warehouse).Method("GetProducts").WithAnyArguments();
 
@@ -77,7 +74,7 @@ namespace NMock2Tests
         public void Test4_MockedArgument()
         {
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
+            var warehouse = mockery.NewMock<IWarehouse>(MockStyle.Stub);
             Expect.On(warehouse).Method("GetProducts").With(Is.EqualTo("foo")).Will(Return.Value(DefaultProducts));
 
             var cart = new ShoppingCart();
@@ -88,12 +85,22 @@ namespace NMock2Tests
 
         /// <summary>
         /// Mock <see cref="ShoppingCart"/> so that any call to it would invoke the original implementation, 
-        /// but some explicitly specified methods would be mocked. 
+        /// but some explicitly specified methods would be mocked. (<see cref="IWarehouse"/> is mocked 
+        /// here as well, just as a "byproduct").
         /// </summary>
         [Test]
         public void Test5_PartialMocks()
         {
-            //It's impossible to do with NMock2.
+            var mockery = new Mockery();
+            var warehouse = mockery.NewMock<IWarehouse>(MockStyle.Stub);
+            var cart = mockery.NewMock<ShoppingCart>(MockStyle.Transparent);
+
+            Expect.On(warehouse).Method("GetProducts").With(Is.Anything).Will(Return.Value(DefaultProducts));
+            Expect.On(cart).GetProperty("IsRed").Will(Return.Value(true));
+            
+            cart.AddProducts("foo", warehouse);
+
+            Assert.AreEqual(0, cart.GetProductsCount(), "No products can be added to a cart that is in the 'red' state.");
         }
 
         /// <summary>
