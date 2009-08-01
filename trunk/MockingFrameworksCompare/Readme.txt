@@ -1,19 +1,27 @@
 ﻿
 	MockingFrameworksCompare.
 
-The purpose of the project is to allow developers easily compare mocking frameworks available 
-for .NET, and make an informed decision when picking one up. 
+---------------------------------------
+----------------- WHY -----------------
+---------------------------------------
+The purpose of the project is to allow developers easily compare mocking frameworks 
+available for .NET, and make an informed decision when picking one up. 
 
-It provides a unified set of tests to showcase Moq, NMock2, Rhino Mocks, Typemock Isolator and 
-a new star of mocking - Stubs framework from Microsoft Research.
+---------------------------------------
+----------------- HOW -----------------
+---------------------------------------
+It provides a unified set of tests to showcase Moq, NMock2, Rhino Mocks, Typemock Isolator 
+and a new star of mocking - Stubs framework from Microsoft Research.
 
-Each test is written against every framework so you can easily compare syntax of the frameworks 
-and implications of using any of them. For educational purposes, source code of the frameworks
-if provided (apart from the Isolator which is a paid one - but you can download a 21 day trial -
-and Stubs which is free but not open source).
+Each test is written against every framework so you can easily compare syntax and implications
+of using any of them. For educational purposes, source code of the frameworks if provided, 
+apart from:
+	* the Isolator (which is a paid one - but you can download a 21 day trial)
+	* and Stubs (which is free but not open source).
 
-Also there is a Performance project that gives another dimension for comparison.
-
+---------------------------------------
+----------------- WHAT-----------------
+---------------------------------------
 The project contains the following test scenarios:
 
 	1. BrainSample. 
@@ -27,7 +35,7 @@ The project contains the following test scenarios:
 			* Test3_MockedProperty - simply mock a property
 			* Test4_MockedArgument - mock a method for a specific argument only
 			* Test5_PartialMocks - mock only some methods/properties, and call original ones if they're not mocked.
-			* Test6_RecursiveMocks - mock chains like "foo.Boo.Zoo.Goo()" without having to mock the intermediate types.
+			* Test6_RecursiveMocks - mock chains like "user.ContactDetails.Address.GetZipCode()" without having to mock the intermediate types.
 			
 	3. Performance.
 	   This project runs all tests from ShoppingCartSample in a sophisticated loop, and displays 
@@ -35,15 +43,18 @@ The project contains the following test scenarios:
 	   based on CodeTimers, amazing approach from Vance Morrison (http://blogs.msdn.com/vancem/archive/2006/09/21/765648.aspx)
 		
 	4. FailingSample.
-	   This one reveals the differences in error messages that come from mockings frameworks.
+	   This one reveals the differences in error messages that come from the mockings frameworks.
 
 
+---------------------------------------
+------------ OTHER DETAILS ------------
+---------------------------------------
 The following versions of the mocking frameworks are used:
-* Moq:			3.0.307.1  (checked out 31.05.2009, revision #582)
-* NMock2:		1.2.3262   (checked out 31.05.2009, revision #143)
-* Rhino Mocks:		3.5.0.2041 (checked out 31.05.2009, revision #2162)
+* Moq:			3.5.0.0 (checked out 01.08.2009, revision #604)
+* NMock2:		1.2.3262 (checked out 31.05.2009, revision #153)
+* Rhino Mocks:		3.5.0.2041 (checked out 31.05.2009, revision #2217)
 * Isolator:		5.3.1.0 
-* Stubs:		0.12.40430.3
+* Stubs:		0.14.40610.2
 
 
 
