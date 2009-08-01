@@ -27,8 +27,20 @@ namespace NMock2.Monitoring
     /// </summary>
     public class Invoker : IInvokable
     {
+        /// <summary>
+        /// Holds the type of the target. Can not be inferred from target because it could be a base type.
+        /// </summary>
         private readonly Type targetType;
+
+        /// <summary>
+        /// Holds the target.
+        /// </summary>
         private readonly object target;
+
+        /// <summary>
+        /// Holds the next <see cref="IInvokable"/> to pass the invocation to, 
+        /// if this instance is not responsible for the target type on an invocation.
+        /// </summary>
         private readonly IInvokable next;
 
         /// <summary>

@@ -26,6 +26,9 @@ namespace NMock2.Matchers
     /// </summary>
     public class ToStringMatcher : Matcher
     {
+        /// <summary>
+        /// Holds the wrapped matcher.
+        /// </summary>
         private readonly Matcher matcher;
 
         /// <summary>

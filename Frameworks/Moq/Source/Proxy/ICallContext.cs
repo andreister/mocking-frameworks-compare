@@ -39,26 +39,24 @@
 // http://www.opensource.org/licenses/bsd-license.php]
 
 using System;
-using System.Linq.Expressions;
+using System.Reflection;
 
-namespace Moq
+namespace Moq.Proxy
 {
-	internal class LazyEvalMatcher : IMatcher
+	internal interface ICallContext
 	{
-		private Expression matcherExpression;
+		object[] Arguments { get; }
 
-		public void Initialize(Expression matcherExpression)
-		{
-			this.matcherExpression = matcherExpression;
-		}
+		MethodInfo Method { get; }
 
-		public bool Matches(object value)
-		{
-			Expression eval = Evaluator.PartialEval(matcherExpression);
-			if (eval.NodeType == ExpressionType.Constant)
-				return Object.Equals(((ConstantExpression)eval).Value, value);
-			else
-				return false;
-		}
+		object ReturnValue { get; set; }
+
+		// TODO analyze delete
+		Type TargetType { get; }
+
+		// TODO analyze delete
+		void InvokeBase();
+
+		void SetArgumentValue(int index, object value);
 	}
 }

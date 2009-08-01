@@ -65,6 +65,12 @@
     <Compile Include="Actions\SetNamedParameterAction.cs" />
     <Compile Include="Actions\SignalAction.cs" />
     <Compile Include="Actions\ThrowAction.cs" />
+    <Compile Include="Collect.cs" />
+    <Compile Include="DefinedAs.cs" />
+    <Compile Include="IMockDefinition.cs" />
+    <Compile Include="Internal\MockBuilder.cs" />
+    <Compile Include="Internal\StubMockStyleDictionary.cs" />
+    <Compile Include="Syntax\IMockDefinitionSyntax.cs" />
     <Compile Include="Internal\CompositeType.cs" />
     <Compile Include="Expect.cs" />
     <Compile Include="Fire.cs" />

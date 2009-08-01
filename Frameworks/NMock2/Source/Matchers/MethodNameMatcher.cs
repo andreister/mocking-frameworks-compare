@@ -26,6 +26,9 @@ namespace NMock2.Matchers
     /// </summary>
     public class MethodNameMatcher : Matcher
     {
+        /// <summary>
+        /// Holds the expected name of the mocked method.
+        /// </summary>
         private readonly string methodName;
 
         /// <summary>

@@ -39,10 +39,11 @@
 // http://www.opensource.org/licenses/bsd-license.php]
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Castle.Core.Interceptor;
+using Moq.Proxy;
 
 namespace Moq
 {
@@ -66,40 +67,37 @@ namespace Moq
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily", Justification="The linq expression is way more readable this way.")]
-		public static string Format(this IInvocation invocation)
+		public static string Format(this ICallContext invocation)
 		{
-			// Special-case for getters && setters
-			if (invocation.Method.IsSpecialName)
+			if (invocation.Method.IsPropertyGetter())
 			{
-				if (invocation.Method.Name.StartsWith("get_", StringComparison.Ordinal))
-					return
-						invocation.Method.DeclaringType.Name + "." +
-						invocation.Method.Name.Substring(4);
-				else if (invocation.Method.Name.StartsWith("set_", StringComparison.Ordinal))
-					return
-						invocation.Method.DeclaringType.Name + "." +
-						invocation.Method.Name.Substring(4) + " = " +
-						(from x in invocation.Arguments
-						 select x == null ?
-								"null" :
-								x is string ?
-									"\"" + (string)x + "\"" :
-									x.ToString()).First();
+				return invocation.Method.DeclaringType.Name + "." + invocation.Method.Name.Substring(4);
 			}
 
-			return
-				invocation.Method.DeclaringType.Name + "." +
-				invocation.Method.Name + "(" +
-				String.Join(", ",
-					(from x in invocation.Arguments
-					 select x == null ?
-						"null" :
-						x is string ?
-							"\"" + (string)x + "\"" :
-							x.ToString())
-					.ToArray()
-				) + ")";
+			if (invocation.Method.IsPropertySetter())
+			{
+				return invocation.Method.DeclaringType.Name + "." +
+					invocation.Method.Name.Substring(4) + " = " + GetValue(invocation.Arguments.First());
+			}
+
+			return invocation.Method.DeclaringType.Name + "." + invocation.Method.Name + "(" +
+				string.Join(", ", invocation.Arguments.Select(a => GetValue(a)).ToArray()) + ")";
+		}
+
+		public static string GetValue(object value)
+		{
+			if (value == null)
+			{
+				return "null";
+			}
+
+			var typedValue = value as string;
+			if (typedValue != null)
+			{
+				return "\"" + typedValue + "\"";
+			}
+
+			return value.ToString();
 		}
 
 		public static object InvokePreserveStack(this Delegate del, params object[] args)
@@ -139,10 +137,7 @@ namespace Moq
 
 		public static bool IsMockeable(this Type typeToMock)
 		{
-			return 
-				typeToMock.IsInterface ||
-				typeToMock.IsAbstract ||
-				!typeToMock.IsSealed;
+			return typeToMock.IsInterface || typeToMock.IsAbstract || !typeToMock.IsSealed;
 		}
 
 		public static bool CanOverrideGet(this PropertyInfo property)
@@ -178,18 +173,22 @@ namespace Moq
 				eventExpression(mock);
 
 				if (context.LastInvocation == null)
+				{
 					throw new ArgumentException("Expression is not an event attach or detach, or the event is declared in a class but not marked virtual.");
+				}
 
 				addRemove = context.LastInvocation.Invocation.Method;
 			}
 
 			var ev = addRemove.DeclaringType.GetEvent(
-					addRemove.Name.Replace("add_", "").Replace("remove_", ""));
+				addRemove.Name.Replace("add_", "").Replace("remove_", ""));
 
 			if (ev == null)
 			{
-				throw new ArgumentException(String.Format(CultureInfo.CurrentCulture,
-					"Could not locate event for attach or detach method {0}.", addRemove.ToString()));
+				throw new ArgumentException(string.Format(
+					CultureInfo.CurrentCulture,
+					"Could not locate event for attach or detach method {0}.",
+					addRemove));
 			}
 
 			return ev;

@@ -18,14 +18,13 @@
 //-----------------------------------------------------------------------
 namespace NMock2.Internal
 {
-    using System;
-    using System.Collections;
+    using System.Collections.Generic;
     using System.IO;
     using NMock2.Monitoring;
 
     public class OrderedExpectations : IExpectationOrdering
     {
-        private ArrayList expectations = new ArrayList();
+        private readonly List<IExpectation> expectations = new List<IExpectation>();
         private int current = 0;
         private int depth;
 
@@ -40,7 +39,7 @@ namespace NMock2.Internal
         
         public bool IsActive
         {
-            get { return this.CurrentExpectation.IsActive; }
+            get { return this.expectations.Count > 0 && this.CurrentExpectation.IsActive; }
         }
         
         public bool HasBeenMet
@@ -60,7 +59,7 @@ namespace NMock2.Internal
         /// <value>The current expectation.</value>
         private IExpectation CurrentExpectation
         {
-            get { return (IExpectation)this.expectations[this.current]; }
+            get { return this.expectations[this.current]; }
         }
 
         /// <summary>
@@ -80,18 +79,24 @@ namespace NMock2.Internal
         /// <value>The next expectation.</value>
         private IExpectation NextExpectation
         {
-            get { return (IExpectation)this.expectations[this.current + 1]; }
+            get { return this.expectations[this.current + 1]; }
         }
 
         public bool Matches(Invocation invocation)
         {
-            return this.CurrentExpectation.Matches(invocation) ||
-                   (this.CurrentExpectation.HasBeenMet && this.NextExpectationMatches(invocation));
+            return this.expectations.Count != 0 &&
+                   (this.CurrentExpectation.Matches(invocation) ||
+                       (this.CurrentExpectation.HasBeenMet && this.NextExpectationMatches(invocation)));
         }
 
         public void AddExpectation(IExpectation expectation)
         {
             this.expectations.Add(expectation);
+        }
+
+        public void RemoveExpectation(IExpectation expectation)
+        {
+            this.expectations.Remove(expectation);
         }
 
         public void Perform(Invocation invocation)
@@ -136,6 +141,16 @@ namespace NMock2.Internal
                     writer.WriteLine();
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds all expectations to <paramref name="result"/> that are associated to <paramref name="mock"/>.
+        /// </summary>
+        /// <param name="mock">The mock for which expectations are queried.</param>
+        /// <param name="result">The result to add matching expectations to.</param>
+        public void QueryExpectationsBelongingTo(IMockObject mock, IList<IExpectation> result)
+        {
+            this.expectations.ForEach(expectation => expectation.QueryExpectationsBelongingTo(mock, result));
         }
 
         private bool NextExpectationHasBeenMet()

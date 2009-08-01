@@ -144,6 +144,18 @@ namespace NMock2.Internal
 
                             return;
                         }
+                        
+                        if (invocation.Method.Name.StartsWith("add_"))
+                        {
+                            this.AddEventHandler(invocation.Method.Name.Substring(4), (Delegate)invocation.Parameters[0]);
+                            return;
+                        }
+                        
+                        if (invocation.Method.Name.StartsWith("remove_"))
+                        {
+                            this.RemoveEventHandler(invocation.Method.Name.Substring(7), (Delegate)invocation.Parameters[0]);
+                            return;
+                        }
 
                         // check whether we already have a value for this call
                         object result;

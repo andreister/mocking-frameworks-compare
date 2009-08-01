@@ -25,6 +25,9 @@ namespace NMock2.Matchers
     /// </summary>
     public class NotMatcher : Matcher
     {
+        /// <summary>
+        /// Holds the matcher to negate.
+        /// </summary>
         private readonly Matcher negated;
 
         /// <summary>
