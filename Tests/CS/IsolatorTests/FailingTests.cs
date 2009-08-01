@@ -10,42 +10,58 @@ namespace IsolatorTests
     /// </summary>
     public class FailingTests
     {
+        /// <summary>
+        /// Per our setup, BurnException is always thrown so "mouth.Yell" is always called. 
+        /// Imagine it's not what we want (the setup is incorrect), and the test would fail. 
+        /// Which error message would we get? 
+        /// </summary>
         public void CallOnceExpectNever()
         {
             var hand = Isolate.Fake.Instance<Hand>();
             var mouth = Isolate.Fake.Instance<Mouth>();
-            var iron = new Iron { IsHot = true };
-            Isolate.WhenCalled(() => hand.TouchIron(iron)).WillThrow(new BurnException());
+            Isolate.WhenCalled(() => hand.TouchIron(null)).WillThrow(new BurnException());
 
             var brain = new Brain(hand, mouth);
-            brain.TouchIron(iron);
+            brain.TouchIron(new Iron());
 
             Isolate.Verify.WasNotCalled(() => mouth.Yell());
         }
 
+        /// <summary>
+        /// Per our setup, BurnException is never thrown so "mouth.Yell" is never called. 
+        /// Imagine it's not what we want (the setup is incorrect), and the test would fail. 
+        /// Which error message would we get? 
+        /// </summary>
         public void CallNeverExpectOnce()
         {
             var hand = Isolate.Fake.Instance<Hand>();
             var mouth = Isolate.Fake.Instance<Mouth>();
-            var iron = new Iron { IsHot = true };
-            Isolate.WhenCalled(() => hand.TouchIron(iron)); //we don't throw an exception, so mouth.Yell won't be called
+            Isolate.WhenCalled(() => hand.TouchIron(null)); 
 
             var brain = new Brain(hand, mouth);
-            brain.TouchIron(iron);
+            brain.TouchIron(new Iron {IsHot = true});
 
-            Isolate.Verify.WasCalledWithAnyArguments(() => mouth.Yell()); //but we expect it
+            Isolate.Verify.WasCalledWithAnyArguments(() => mouth.Yell()); 
         }
 
-        public void CallNeverExpectOnceCustom()
+        /// <summary>
+        /// Per our setup, BurnException is never thrown so "mouth.Yell" is never called. 
+        /// Imagine it's not what we want (the setup is incorrect), and the test would fail. 
+        /// Can we provide a custom message for that? 
+        /// </summary>
+        public void FailWithCustomMessage()
         {
             Assert.Fail("Isolator does not allow custom messages.");
         }
 
+        /// <summary>
+        /// Per our setup, GetProducts is called with a different parameter than we expect.
+        /// Which error message would we get?  
+        /// </summary>
         public void CallExpectedWithWrongParameters()
         {
-            string expectedName = "nail";
-            string unexpectedName = "hammer";
-
+            const string expectedName = "nail";
+            const string unexpectedName = "hammer";
             var warehouse = Isolate.Fake.Instance<IWarehouse>(); 
             
             var cart = new ShoppingCart();

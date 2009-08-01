@@ -17,8 +17,8 @@ namespace NMock2Tests
         public void TouchHotIron_Yell()
         {
             var mockery = new Mockery();
-            var hand = (IHand)mockery.NewMock(typeof(IHand));
-            var mouth = (IMouth)mockery.NewMock(typeof(IMouth));
+            var hand = mockery.NewMock<IHand>();
+            var mouth = mockery.NewMock<IMouth>();
             var iron = new Iron { IsHot = true };
             Expect.On(hand).Method("TouchIron").With(iron).Will(Throw.Exception(new BurnException()));
             Expect.On(mouth).Method("Yell");

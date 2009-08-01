@@ -10,60 +10,73 @@ namespace NMock2Tests
     /// </summary>
     public class FailingTests
     {
+        /// <summary>
+        /// Per our setup, BurnException is always thrown so "mouth.Yell" is always called. 
+        /// Imagine it's not what we want (the setup is incorrect), and the test would fail. 
+        /// Which error message would we get? 
+        /// </summary>
         public void CallOnceExpectNever()
         {
             var mockery = new Mockery();
-            var hand = (IHand)mockery.NewMock(typeof(IHand));
-            var mouth = (IMouth)mockery.NewMock(typeof(IMouth));
-            var iron = new Iron { IsHot = true };
-            Expect.On(hand).Method("TouchIron").With(iron).Will(Throw.Exception(new BurnException()));
-            //NMock2 creates strict mocks - we just remove the expectation, and the test should fail
-            //Expect.On(mouth).Method("Yell"); 
+            var hand = mockery.NewMock<IHand>(MockStyle.Stub);
+            var mouth = mockery.NewMock<IMouth>(); 
+            Expect.On(hand).Method("TouchIron").With(Is.Anything).Will(Throw.Exception(new BurnException()));
+            Expect.Never.On(mouth).Method("Yell");
             
             var brain = new Brain(hand, mouth);
-            brain.TouchIron(iron);
+            brain.TouchIron(new Iron());
 
             mockery.VerifyAllExpectationsHaveBeenMet();
         }
 
+        /// <summary>
+        /// Per our setup, BurnException is never thrown so "mouth.Yell" is never called. 
+        /// Imagine it's not what we want (the setup is incorrect), and the test would fail. 
+        /// Which error message would we get? 
+        /// </summary>
         public void CallNeverExpectOnce()
         {
             var mockery = new Mockery();
-            var hand = (IHand)mockery.NewMock(typeof(IHand));
-            var mouth = (IMouth)mockery.NewMock(typeof(IMouth));
-            var iron = new Iron { IsHot = true };
-            Expect.On(hand).Method("TouchIron").With(iron); //we don't throw an exception, so mouth.Yell won't be called
+            var hand = mockery.NewMock<IHand>(MockStyle.Stub);
+            var mouth = mockery.NewMock<IMouth>(MockStyle.Stub); 
+            Expect.On(hand).Method("TouchIron").With(Is.Anything); //we don't throw an exception, so mouth.Yell won't be called
             Expect.On(mouth).Method("Yell"); //but we expect it
 
             var brain = new Brain(hand, mouth);
-            brain.TouchIron(iron);
+            brain.TouchIron(new Iron {IsHot = true});
 
             mockery.VerifyAllExpectationsHaveBeenMet();
         }
 
-        public void CallNeverExpectOnceCustom()
+        /// <summary>
+        /// Per our setup, BurnException is never thrown so "mouth.Yell" is never called. 
+        /// Imagine it's not what we want (the setup is incorrect), and the test would fail. 
+        /// Can we provide a custom message for that? 
+        /// </summary>
+        public void FailWithCustomMessage()
         {
             var mockery = new Mockery();
-            var hand = (IHand)mockery.NewMock(typeof(IHand));
-            var mouth = (IMouth)mockery.NewMock(typeof(IMouth));
-            var iron = new Iron { IsHot = true };
-            Expect.On(hand).Method("TouchIron").With(iron); //we don't throw an exception, so mouth.Yell won't be called
-            Expect.On(mouth).Method("Yell").Comment("This is a meaningful custom message in case the expectation would fail, say, " +
-                "'mouth should yell if we touch a hot iron'."); //but we expect it
+            var hand = mockery.NewMock<IHand>(MockStyle.Stub);
+            var mouth = mockery.NewMock<IMouth>(MockStyle.Stub);
+            Expect.On(hand).Method("TouchIron").With(Is.Anything); 
+            Expect.On(mouth).Method("Yell").Comment("This is a meaningful custom message in case the expectation would fail."); 
 
             var brain = new Brain(hand, mouth);
-            brain.TouchIron(iron);
+            brain.TouchIron(new Iron());
 
             mockery.VerifyAllExpectationsHaveBeenMet();
         }
 
+        /// <summary>
+        /// Per our setup, GetProducts is called with a different parameter than we expect.
+        /// Which error message would we get?  
+        /// </summary>
         public void CallExpectedWithWrongParameters()
         {
-            string expectedName = "nail";
-            string unexpectedName = "hammer";
-
+            const string expectedName = "nail";
+            const string unexpectedName = "hammer";
             var mockery = new Mockery();
-            var warehouse = (IWarehouse)mockery.NewMock(typeof(IWarehouse), MockStyle.Stub);
+            var warehouse = mockery.NewMock<IWarehouse>(MockStyle.Stub);
             Expect.On(warehouse).Method("GetProducts").With(expectedName).Will(Return.Value(new List<Product>()));
 
             var cart = new ShoppingCart();
