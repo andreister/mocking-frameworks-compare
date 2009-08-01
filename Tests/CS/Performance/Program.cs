@@ -51,13 +51,14 @@ namespace Performance
             Console.WriteLine("\nPartial mocks.");
             timer.Measure("Moq      ", () => { moq.Test5_PartialMocks(); result = 1; });
             timer.Measure("Rhino    ", () => { rhino.Test5_PartialMocks(); result = 2; });
-            timer.Measure("Isolator ", () => { isolator.Test5_PartialMocks(); result = 3; });
-            timer.Measure("Stubs ", () => { stubs.Test5_PartialMocks(); result = 5; });
+            timer.Measure("NMock2   ", () => { nmock2.Test5_PartialMocks(); result = 3; });
+            timer.Measure("Isolator ", () => { isolator.Test5_PartialMocks(); result = 4; });
+            timer.Measure("Stubs    ", () => { stubs.Test5_PartialMocks(); result = 5; });
 
             Console.WriteLine("\nRecursive mocks.");
             timer.Measure("Moq      ", () => { moq.Test6_RecursiveMocks(); result = 1; });
             timer.Measure("Rhino    ", () => { rhino.Test6_RecursiveMocks(); result = 2; });
-            timer.Measure("Isolator ", () => { isolator.Test6_RecursiveMocks(); result = 3; });
+            timer.Measure("Isolator ", () => { isolator.Test6_RecursiveMocks(); result = 4; });
             timer.Measure("Stubs    ", () => { stubs.Test6_RecursiveMocks(); result = 5; });
 
             dummy = result;
