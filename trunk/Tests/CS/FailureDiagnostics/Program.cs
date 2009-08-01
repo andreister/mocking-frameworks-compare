@@ -19,7 +19,7 @@ namespace FailureDiagnostics
             Run("NMock2   ", nmock2.CallOnceExpectNever);
             Run("Isolator ", isolator.CallOnceExpectNever);
             Run("Stubs    ", stubs.CallOnceExpectNever);
-            Console.WriteLine("Press any key to continue..."); Console.ReadLine();
+            Console.WriteLine("Press <enter> to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 2. Some expected method is not invoked.");
             Run("Moq      ", moq.CallNeverExpectOnce);
@@ -27,7 +27,7 @@ namespace FailureDiagnostics
             Run("NMock2   ", nmock2.CallNeverExpectOnce);
             Run("Isolator ", isolator.CallNeverExpectOnce);
             Run("Stubs    ", stubs.CallNeverExpectOnce);
-            Console.WriteLine("Press any key to continue..."); Console.ReadLine();
+            Console.WriteLine("Press <enter> to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 3. Some expected method is not invoked - custom message.");
             Run("Moq      ", moq.FailWithCustomMessage);
@@ -35,7 +35,7 @@ namespace FailureDiagnostics
             Run("NMock2   ", nmock2.FailWithCustomMessage);
             Run("Isolator ", isolator.FailWithCustomMessage);
             Run("Stubs    ", stubs.FailWithCustomMessage);
-            Console.WriteLine("Press any key to continue..."); Console.ReadLine();
+            Console.WriteLine("Press <enter> to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 4. Expected method is invoked but parameters were incorrect.");
             Run("Moq      ", moq.CallExpectedWithWrongParameters);
