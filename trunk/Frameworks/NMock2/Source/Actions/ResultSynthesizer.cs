@@ -21,8 +21,11 @@ namespace NMock2.Actions
     using System;
     using System.Collections;
     using System.IO;
-    using NMock2.Monitoring;
+    using Monitoring;
 
+    /// <summary>
+    /// Responsible for handling the results of an invocation.
+    /// </summary>
     public class ResultSynthesizer : IAction
     {
         /// <summary>
@@ -33,7 +36,7 @@ namespace NMock2.Actions
         /// <summary>
         /// Stores the results.
         /// </summary>
-        private Hashtable results = new Hashtable();
+        private readonly Hashtable results = new Hashtable();
 
         /// <summary>
         /// Initializes static members of the <see cref="ResultSynthesizer"/> class.
@@ -48,6 +51,10 @@ namespace NMock2.Actions
             defaultResults[typeof(Stack)] = new ReturnCloneAction(new Stack());
         }
 
+        /// <summary>
+        /// Invokes this object.
+        /// </summary>
+        /// <param name="invocation">The invocation.</param>
         public void Invoke(Invocation invocation)
         {
             Type returnType = invocation.Method.ReturnType;
@@ -80,17 +87,33 @@ namespace NMock2.Actions
                 throw new InvalidOperationException("No action registered for return type " + returnType);
             }
         }
-        
-        public void SetResult(Type type, object result)
+
+        /// <summary>
+        /// Sets the result of the specified <paramref name="returnType"/>.
+        /// </summary>
+        /// <param name="returnType">The type to be returned as a result.</param>
+        /// <param name="result">The result to be set.</param>
+        public void SetResult(Type returnType, object result)
         {
-            this.SetAction(type, Return.Value(result));
+            this.SetAction(returnType, Return.Value(result));
         }
 
+        /// <summary>
+        /// Describes this object to the specified <paramref name="writer"/>.
+        /// </summary>
+        /// <param name="writer">The text writer the description is added to.</param>
         public void DescribeTo(TextWriter writer)
         {
             writer.Write("a synthesized result");
         }
 
+        /// <summary>
+        /// Gets a new the empty array of the specified <paramref name="arrayType"/>.
+        /// </summary>
+        /// <param name="arrayType">Type of the array to be returned.</param>
+        /// <returns>
+        /// Returns a new empty array of the specified <paramref name="arrayType"/>.
+        /// </returns>
         private static object NewEmptyArray(Type arrayType)
         {
             int rank = arrayType.GetArrayRank();
@@ -99,14 +122,27 @@ namespace NMock2.Actions
             return Array.CreateInstance(arrayType.GetElementType(), dimensions);
         }
 
+        /// <summary>
+        /// Gets the action of the specified <paramref name="returnType"/>.
+        /// </summary>
+        /// <param name="returnType">Type of the returned action.</param>
+        /// <param name="results">The results to get the action from. This is used as a parameter for the <see cref="defaultResults"/>.</param>
+        /// <returns>
+        /// Returns the action of the specified <paramref name="returnType"/> out of the <paramref name="results"/>.
+        /// </returns>
         private IAction GetAction(Type returnType, Hashtable results)
         {
             return (IAction)results[returnType];
         }
 
-        private object SetAction(Type type, IAction action)
+        /// <summary>
+        /// Sets the action of the specified <paramref name="returnType"/>.
+        /// </summary>
+        /// <param name="returnType">Type of the action to be set.</param>
+        /// <param name="action">The action to be set.</param>
+        private void SetAction(Type returnType, IAction action)
         {
-            return this.results[type] = action;
+            this.results[returnType] = action;
         }
     }
 }

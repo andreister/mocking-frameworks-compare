@@ -20,6 +20,7 @@ namespace NMock2.Internal
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.IO;
     using NMock2.Monitoring;
 
@@ -28,7 +29,7 @@ namespace NMock2.Internal
         /// <summary>
         /// Stores the expectations that could be added.
         /// </summary>
-        private ArrayList expectations = new ArrayList();
+        private List<IExpectation> expectations = new List<IExpectation>();
 
         /// <summary>
         /// Stores the calling depth for the document writer output.
@@ -165,9 +166,24 @@ namespace NMock2.Internal
             }
         }
 
+        /// <summary>
+        /// Adds all expectations to <paramref name="result"/> that are associated to <paramref name="mock"/>.
+        /// </summary>
+        /// <param name="mock">The mock for which expectations are queried.</param>
+        /// <param name="result">The result to add matching expectations to.</param>
+        public void QueryExpectationsBelongingTo(IMockObject mock, IList<IExpectation> result)
+        {
+            this.expectations.ForEach(expectation => expectation.QueryExpectationsBelongingTo(mock, result));
+        }
+
         public void AddExpectation(IExpectation expectation)
         {
             this.expectations.Add(expectation);
+        }
+
+        public void RemoveExpectation(IExpectation expectation)
+        {
+            this.expectations.Remove(expectation);
         }
 
         private void Indent(TextWriter writer, int n)

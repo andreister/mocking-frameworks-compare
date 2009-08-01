@@ -19,14 +19,22 @@
 namespace NMock2.Internal
 {
     /// <summary>
-    /// Represents an ordered expectation.
+    /// Represents expectations (order or unordered).
     /// </summary>
     public interface IExpectationOrdering : IExpectation
     {
         /// <summary>
-        /// Adds an expectation to this mock.
+        /// Adds an expectation.
         /// </summary>
         /// <param name="expectation">The expectation to add.</param>
         void AddExpectation(IExpectation expectation);
+
+        /// <summary>
+        /// Removes the specified expectation.
+        /// </summary>
+        /// <param name="expectation">The expectation to remove.</param>
+        void RemoveExpectation(IExpectation expectation);
+
+        
     }
 }

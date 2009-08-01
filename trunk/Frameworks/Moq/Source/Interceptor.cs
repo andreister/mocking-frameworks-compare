@@ -43,7 +43,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Castle.Core.Interceptor;
+using Moq.Proxy;
 
 namespace Moq
 {
@@ -51,17 +51,13 @@ namespace Moq
 	/// Implements the actual interception and method invocation for 
 	/// all mocks.
 	/// </summary>
-#if SILVERLIGHT
-	internal class Interceptor : IInterceptor
-#else
-	internal class Interceptor : MarshalByRefObject, IInterceptor
-#endif
+	internal class Interceptor : ICallInterceptor
 	{
 		private MockBehavior behavior;
 		private Type targetType;
 		private Dictionary<ExpressionKey, IProxyCall> calls = new Dictionary<ExpressionKey, IProxyCall>();
 		private List<IProxyCall> orderedCalls = new List<IProxyCall>();
-		private List<IInvocation> actualInvocations = new List<IInvocation>();
+		private List<ICallContext> actualInvocations = new List<ICallContext>();
 
 		public Interceptor(MockBehavior behavior, Type targetType, Mock mock)
 		{
@@ -70,8 +66,17 @@ namespace Moq
 			this.Mock = mock;
 		}
 
-		internal IEnumerable<IInvocation> ActualCalls { get { return actualInvocations; } }
+		internal IEnumerable<ICallContext> ActualCalls
+		{
+			get { return this.actualInvocations; }
+		}
+
 		internal Mock Mock { get; private set; }
+
+		internal IEnumerable<IProxyCall> OrderedCalls
+		{
+			get { return this.orderedCalls; }
+		}
 
 		internal void Verify()
 		{
@@ -101,7 +106,7 @@ namespace Moq
 		{
 			var expr = call.SetupExpression.PartialMatcherAwareEval();
 
-			var s = expr.ToStringFixed();
+			var s = expr.ToStringFixed(true);
 
 			if (kind == SetupKind.PropertySet)
 			{
@@ -126,11 +131,13 @@ namespace Moq
 			//    calls[expr.ToStringFixed()] = call;
 		}
 
-		public void Intercept(IInvocation invocation)
+		public void Intercept(ICallContext invocation)
 		{
 			// Track current invocation if we're in "record" mode in a fluent invocation context.
 			if (FluentMockContext.IsActive)
+			{
 				FluentMockContext.Current.Add(this.Mock, invocation);
+			}
 
 			// TODO: too many ifs in this method.
 			// see how to refactor with strategies.
@@ -151,11 +158,11 @@ namespace Moq
 			// Special case for events.
 			if (!FluentMockContext.IsActive)
 			{
-				if (IsEventAttach(invocation))
+				if (invocation.Method.IsEventAttach())
 				{
 					var delegateInstance = (Delegate)invocation.Arguments[0];
 					// TODO: validate we can get the event?
-					EventInfo eventInfo = GetEventFromName(invocation.Method.Name.Replace("add_", ""));
+					var eventInfo = GetEventFromName(invocation.Method.Name.Substring(4));
 
 					if (delegateInstance != null)
 					{
@@ -173,11 +180,11 @@ namespace Moq
 
 					return;
 				}
-				else if (IsEventDetach(invocation))
+				else if (invocation.Method.IsEventDetach())
 				{
 					var delegateInstance = (Delegate)invocation.Arguments[0];
 					// TODO: validate we can get the event?
-					EventInfo eventInfo = GetEventFromName(invocation.Method.Name.Replace("remove_", ""));
+					var eventInfo = GetEventFromName(invocation.Method.Name.Substring(7));
 
 					if (delegateInstance != null)
 					{
@@ -195,27 +202,20 @@ namespace Moq
 
 					return;
 				}
+
+				// Save to support Verify[expression] pattern.
+				// In a fluent invocation context, which is a recorder-like 
+				// mode we use to evaluate delegates by actually running them, 
+				// we don't want to count the invocation, or actually run 
+				// previous setups.
+				actualInvocations.Add(invocation);
 			}
 
-			// Save to support Verify[expression] pattern.
-			// In a fluent invocation context, which is a recorder-like 
-			// mode we use to evaluate delegates by actually running them, 
-			// we don't want to count the invocation, or actually run 
-			// previous setups.
-			if (!FluentMockContext.IsActive)
-				actualInvocations.Add(invocation);
+			var call = FluentMockContext.IsActive ? (IProxyCall)null : orderedCalls.LastOrDefault(c => c.Matches(invocation));
 
-			var call = FluentMockContext.IsActive ? (IProxyCall) null : orderedCalls.LastOrDefault(c => c.Matches(invocation));
-
-			if (call == null && !FluentMockContext.IsActive)
+			if (call == null && !FluentMockContext.IsActive && behavior == MockBehavior.Strict)
 			{
-				if (behavior == MockBehavior.Strict)
-				{
-					throw new MockException(
-					  MockException.ExceptionReason.NoSetup,
-					  behavior,
-					  invocation);
-				}
+				throw new MockException(MockException.ExceptionReason.NoSetup, behavior, invocation);
 			}
 
 			if (call != null)
@@ -231,20 +231,18 @@ namespace Moq
 			else if (invocation.Method.DeclaringType == typeof(object))
 			{
 				// Invoke underlying implementation.
-				invocation.Proceed();
+				invocation.InvokeBase();
 			}
-			else if (invocation.TargetType.IsClass &&
-			  !invocation.Method.IsAbstract
-				&& this.Mock.CallBase)
+			else if (invocation.TargetType.IsClass && !invocation.Method.IsAbstract && this.Mock.CallBase)
 			{
 				// For mocked classes, if the target method was not abstract, 
 				// invoke directly.
 				// Will only get here for Loose behavior.
 				// TODO: we may want to provide a way to skip this by the user.
-				invocation.Proceed();
+				invocation.InvokeBase();
 			}
 			else if (invocation.Method != null && invocation.Method.ReturnType != null &&
-			  invocation.Method.ReturnType != typeof(void))
+				invocation.Method.ReturnType != typeof(void))
 			{
 				Mock recursiveMock;
 				if (this.Mock.InnerMocks.TryGetValue(invocation.Method, out recursiveMock))
@@ -260,18 +258,6 @@ namespace Moq
 			}
 		}
 
-		private static bool IsEventAttach(IInvocation invocation)
-		{
-			return invocation.Method.IsSpecialName &&
-					  invocation.Method.Name.StartsWith("add_", StringComparison.Ordinal);
-		}
-
-		private static bool IsEventDetach(IInvocation invocation)
-		{
-			return invocation.Method.IsSpecialName &&
-						invocation.Method.Name.StartsWith("remove_", StringComparison.Ordinal);
-		}
-
 		/// <summary>
 		/// Get an eventInfo for a given event name.  Search type ancestors depth first if necessary.
 		/// </summary>
@@ -285,8 +271,10 @@ namespace Moq
 				var currentType = depthFirstProgress.Dequeue();
 				var eventInfo = currentType.GetEvent(eventName);
 				if (eventInfo != null)
+				{
 					return eventInfo;
-				//else
+				}
+
 				foreach (var implementedType in GetAncestorTypes(currentType))
 				{
 					depthFirstProgress.Enqueue(implementedType);
@@ -299,22 +287,18 @@ namespace Moq
 		/// Given a type return all of its ancestors, both types and interfaces.
 		/// </summary>
 		/// <param name="initialType">The type to find immediate ancestors of</param>
-		private IEnumerable<Type> GetAncestorTypes(Type initialType)
+		private static IEnumerable<Type> GetAncestorTypes(Type initialType)
 		{
 			Type baseType = initialType.BaseType;
 			if (baseType != null)
-				yield return baseType;
-#if SILVERLIGHT
-			foreach (var implementedInterface in Castle.DynamicProxy.SilverlightExtensions.Extensions.FindInterfaces(initialType, new TypeFilter((foo, bar) => true), null))
-#else
-			foreach (var implementedInterface in initialType.FindInterfaces(new TypeFilter((foo, bar) => true), null))
-#endif
 			{
-				yield return implementedInterface;
+				return new[] { baseType };
 			}
+
+			return initialType.GetInterfaces();
 		}
 
-		private void ThrowIfReturnValueRequired(IProxyCall call, IInvocation invocation)
+		private void ThrowIfReturnValueRequired(IProxyCall call, ICallContext invocation)
 		{
 			if (behavior != MockBehavior.Loose &&
 				invocation.Method != null &&
@@ -326,15 +310,16 @@ namespace Moq
 				{
 					throw new MockException(
 						MockException.ExceptionReason.ReturnValueRequired,
-						behavior, invocation);
+						behavior,
+						invocation);
 				}
 			}
 		}
 
-		class ExpressionKey
+		private class ExpressionKey
 		{
-			string fixedString;
-			List<object> values;
+			private string fixedString;
+			private List<object> values;
 
 			public ExpressionKey(string fixedString, List<object> values)
 			{
@@ -344,23 +329,24 @@ namespace Moq
 
 			public override bool Equals(object obj)
 			{
-				if (Object.ReferenceEquals(this, obj))
+				if (object.ReferenceEquals(this, obj))
+				{
 					return true;
+				}
 
 				var key = obj as ExpressionKey;
-
 				if (key == null)
-					return false;
-
-				var eq = key.fixedString == this.fixedString &&
-					key.values.Count == this.values.Count;
-
-				var i = 0;
-
-				while (eq && i < this.values.Count)
 				{
-					eq |= this.values[i] == key.values[i];
-					i++;
+					return false;
+				}
+
+				var eq = key.fixedString == this.fixedString && key.values.Count == this.values.Count;
+
+				var index = 0;
+				while (eq && index < this.values.Count)
+				{
+					eq |= this.values[index] == key.values[index];
+					index++;
 				}
 
 				return eq;
@@ -373,14 +359,16 @@ namespace Moq
 				foreach (var value in values)
 				{
 					if (value != null)
+					{
 						hash ^= value.GetHashCode();
+					}
 				}
 
 				return hash;
 			}
 		}
 
-		class ConstantsVisitor : ExpressionVisitor
+		private class ConstantsVisitor : ExpressionVisitor
 		{
 			public ConstantsVisitor(Expression expression)
 			{

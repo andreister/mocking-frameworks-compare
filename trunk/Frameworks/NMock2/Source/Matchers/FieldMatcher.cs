@@ -27,7 +27,14 @@ namespace NMock2.Matchers
     /// </summary>
     public class FieldMatcher : Matcher
     {
+        /// <summary>
+        /// Name of the field to match against the <seealso cref="valueMatcher"/>.
+        /// </summary>
         private readonly string fieldName;
+
+        /// <summary>
+        /// The value <see cref="Matcher"/> used to match the field of the object under investigation.
+        /// </summary>
         private readonly Matcher valueMatcher;
 
         /// <summary>

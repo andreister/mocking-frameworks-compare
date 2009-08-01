@@ -40,15 +40,15 @@
 
 using System.Linq.Expressions;
 using System.Reflection;
-using Castle.Core.Interceptor;
+using Moq.Proxy;
 
 namespace Moq
 {
 	internal interface IProxyCall
 	{
-		bool Matches(IInvocation call);
-		void Execute(IInvocation call);
-		void SetOutParameters(IInvocation call);
+		bool Matches(ICallContext call);
+		void Execute(ICallContext call);
+		void SetOutParameters(ICallContext call);
 		bool IsVerifiable { get; set; }
 		string FailMessage { get; set; }
 		bool IsNever { get; set; }

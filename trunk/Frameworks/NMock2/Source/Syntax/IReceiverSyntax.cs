@@ -26,8 +26,8 @@ namespace NMock2.Syntax
         /// <summary>
         /// Defines the receiver.
         /// </summary>
-        /// <param name="o">The dynamic mock on which the expectation or stub is applied.</param>
+        /// <param name="receiver">The dynamic mock on which the expectation or stub is applied.</param>
         /// <returns>Method syntax defining the method, property or event.</returns>
-        IMethodSyntax On(object o);
+        IMethodSyntax On(object receiver);
     }
 }

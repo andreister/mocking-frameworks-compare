@@ -18,7 +18,9 @@
 //-----------------------------------------------------------------------
 namespace NMock2
 {
+    using System.Collections.Generic;
     using System.IO;
+    using Internal;
     using NMock2.Monitoring;
 
     /// <summary>
@@ -37,6 +39,13 @@ namespace NMock2
         void DescribeActiveExpectationsTo(TextWriter writer);
 
         void DescribeUnmetExpectationsTo(TextWriter writer);
+
+        /// <summary>
+        /// Adds all expectations to <paramref name="result"/> that are associated to <paramref name="mock"/>.
+        /// </summary>
+        /// <param name="mock">The mock for which expectations are queried.</param>
+        /// <param name="result">The result to add matching expectations to.</param>
+        void QueryExpectationsBelongingTo(IMockObject mock, IList<IExpectation> result);
     }
 }
 

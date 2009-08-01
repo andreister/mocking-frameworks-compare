@@ -28,8 +28,9 @@ namespace NMock2.Matchers
     /// </summary>
     public class GenericMethodTypeParametersMatcher : Matcher
     {
-        private static readonly object OutParameter = new object();
-        
+        /// <summary>
+        /// An ordered list of type <see cref="Matcher"/>'s each matching a single method argument.
+        /// </summary>
         private readonly Matcher[] typeMatchers;
 
         /// <summary>
@@ -98,12 +99,26 @@ namespace NMock2.Matchers
             }
         }
 
+        /// <summary>
+        /// Determines whether the arguments of the invocation matches the initial arguments.
+        /// </summary>
+        /// <param name="invocation">The invocation to match against the initial arguments.</param>
+        /// <returns>
+        /// Returns true if invocation matches the initial arguments; false otherwise.
+        /// </returns>
         private bool MatchesTypes(Invocation invocation)
         {
             return invocation.Method.GetGenericArguments().Length == this.typeMatchers.Length
                    && this.MatchesTypeValues(invocation);
         }
 
+        /// <summary>
+        /// Determines whether all argument types of the generic method matches the invocation.
+        /// </summary>
+        /// <param name="invocation">The invocation to match against the initial argument types.</param>
+        /// <returns>
+        /// Returns true if invocation types matches the inital argument types; false otherwise.
+        /// </returns>
         private bool MatchesTypeValues(Invocation invocation)
         {
             Type[] types = invocation.Method.GetGenericArguments();

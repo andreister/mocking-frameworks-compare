@@ -74,6 +74,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +155,7 @@
     <Compile Include="Matchers\Matcher.cs" />
     <Compile Include="Matchers\ParamArrayMatcher.cs" />
     <Compile Include="Matchers\RefMatcher.cs" />
+    <Compile Include="MemberInfoExtensions.cs" />
     <Compile Include="MethodCall.Legacy.cs" />
     <Compile Include="Mock.Generic.cs" />
     <Compile Include="Mock.Generic.Legacy.cs">
@@ -165,6 +167,10 @@
     <Compile Include="MockedEvent.Generic.cs" />
     <Compile Include="MockExtensions.cs" />
     <Compile Include="PexProtector.cs" />
+    <Compile Include="Proxy\ICallContext.cs" />
+    <Compile Include="Proxy\CastleProxyFactory.cs" />
+    <Compile Include="Proxy\ICallInterceptor.cs" />
+    <Compile Include="Proxy\IProxyFactory.cs" />
     <Compile Include="SetterMethodCall.cs" />
     <Compile Include="Sub\StubExtensions.cs" />
     <Compile Include="Times.cs" />
@@ -186,9 +192,4 @@
     <Delete Files="$(OutDir)Moq.dll.CodeAnalysisLog.xml" ContinueOnError="true" />
     <Delete Files="$(OutDir)Moq.dll.lastcodeanalysissucceeded" ContinueOnError="true" />
   </Target>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties Notes="&lt;Notes Project=&quot;1c91ac30-5977-4be5-ba67-8eb186c03514&quot; xmlns=&quot;clr-namespace:StickyNotes.Model;assembly=StickyNotes&quot;&gt;&lt;Notes.StickyNotes&gt;&lt;Note FilePath=&quot;&quot; Content=&quot;&quot; Date=&quot;2008-03-04T16:32:50.278875-02:00&quot; /&gt;&lt;/Notes.StickyNotes&gt;&lt;/Notes&gt;" />
-    </VisualStudio>
-  </ProjectExtensions>
 </Project>

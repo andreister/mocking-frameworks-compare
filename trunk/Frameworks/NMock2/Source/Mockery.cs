@@ -20,12 +20,10 @@
 namespace NMock2
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
     using Internal;
     using Monitoring;
-    using NMock2.Matchers;
 
     /// <summary>
     /// The mockery is used to create dynamic mocks and check that all expectations were met during a unit test.
@@ -45,12 +43,17 @@ namespace NMock2
         private readonly IMockObjectFactory currentMockObjectFactory;
 
         /// <summary>
+        /// Holds all mapping from mocks/types to mock styles.
+        /// </summary>
+        private readonly StubMockStyleDictionary stubMockStyleDictionary = new StubMockStyleDictionary();
+
+        /// <summary>
         /// The mock object factory that will be used when a new Mockery instance is created
         /// </summary>
         private static IMockObjectFactory defaultMockObjectFactory;
 
         /// <summary>
-        /// Depth of cascaded ordered, unordered expecation blocks.
+        /// Depth of cascaded ordered, unordered expectation blocks.
         /// </summary>
         private int depth;
 
@@ -65,13 +68,18 @@ namespace NMock2
         private IExpectationOrdering topOrdering;
 
         /// <summary>
-        /// If an unexpected invocation exception is thrown then it is stored here to rethrow it in the 
+        /// If an unexpected invocation exception is thrown then it is stored here to re-throw it in the 
         /// <see cref="VerifyAllExpectationsHaveBeenMet"/> method - exception cannot be swallowed by tested code.
         /// </summary>
         private ExpectationException thrownUnexpectedInvocationException;
 
         /// <summary>
-        /// Initializes static members of the <see cref="Mockery"/> class.
+        /// The delegate used to resolve the default type returned as return value in calls to mocks with stub behavior.
+        /// </summary>
+        private ResolveTypeDelegate resolveTypeDelegate;
+
+        /// <summary>
+        /// Initializes static members of the <see cref="NMock2.Mockery"/> class.
         /// </summary>
         static Mockery()
         {
@@ -79,7 +87,7 @@ namespace NMock2
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Mockery"/> class.
+        /// Initializes a new instance of the <see cref="NMock2.Mockery"/> class.
         /// Clears all expectations.
         /// </summary>
         public Mockery()
@@ -90,7 +98,7 @@ namespace NMock2
         }
 
         /// <summary>
-        /// Gets a disposabale object and tells the mockery that the following expectations are ordered, i.e. they have to be met in the specified order.
+        /// Gets a disposable object and tells the mockery that the following expectations are ordered, i.e. they have to be met in the specified order.
         /// Dispose the returned value to return to previous mode.
         /// </summary>
         /// <value>Disposable object. When this object is disposed then the ordered expectation mode is set back to the mode it was previously
@@ -101,7 +109,7 @@ namespace NMock2
         }
 
         /// <summary>
-        /// Gets a disposabale object and tells the mockery that the following expectations are unordered, i.e. they can be met in any order.
+        /// Gets a disposable object and tells the mockery that the following expectations are unordered, i.e. they can be met in any order.
         /// Dispose the returned value to return to previous mode.
         /// </summary>
         /// <value>Disposable object. When this object is disposed then the unordered expectation mode is set back to the mode it was previously
@@ -112,10 +120,10 @@ namespace NMock2
         }
 
         /// <summary>
-        /// Allows the default IMockObjectFactory to be replaced with a different implementation.
+        /// Allows the default <see cref="IMockObjectFactory"/> to be replaced with a different implementation.
         /// </summary>
-        /// <param name="factoryType">The System.Type of the IMockObjectFactory implementation to use.
-        /// This is expected to implement IMockObjectFactory and have a default constructor.</param>
+        /// <param name="factoryType">The System.Type of the <see cref="IMockObjectFactory"/> implementation to use.
+        /// This is expected to implement <see cref="IMockObjectFactory"/> and have a default constructor.</param>
         public static void ChangeDefaultMockObjectFactory(Type factoryType)
         {
             if (!typeof(IMockObjectFactory).IsAssignableFrom(factoryType))
@@ -141,6 +149,17 @@ namespace NMock2
         }
 
         /// <summary>
+        /// Creates a new dynamic mock of the specified type using the supplied definition.
+        /// </summary>
+        /// <param name="mockedType">The type to mock.</param>
+        /// <param name="definition">An <see cref="IMockDefinition"/> to create the mock from.</param>
+        /// <returns>A dynamic mock for the specified type.</returns>
+        public object NewMock(Type mockedType, IMockDefinition definition)
+        {
+            return definition.Create(mockedType, this, this.currentMockObjectFactory);
+        }
+
+        /// <summary>
         /// Creates a new dynamic mock of the specified type.
         /// </summary>
         /// <param name="mockedType">The type to mock.</param>
@@ -149,7 +168,7 @@ namespace NMock2
         /// <returns>A dynamic mock for the specified type.</returns>
         public object NewMock(Type mockedType, params object[] constructorArgs)
         {
-            return this.CreateMockForType(mockedType, null, MockStyle.Default, new Type[0], constructorArgs);
+            return this.NewMock(mockedType, DefinedAs.WithArgs(constructorArgs));
         }
 
         /// <summary>
@@ -162,64 +181,43 @@ namespace NMock2
         /// <returns>A named dynamic mock for the specified type.</returns>
         public object NewMock(Type mockedType, MockStyle mockStyle, params object[] constructorArgs)
         {
-            return this.CreateMockForType(mockedType, null, mockStyle, new Type[0], constructorArgs);
+            return this.NewMock(mockedType, DefinedAs.OfStyle(mockStyle).WithArgs(constructorArgs));
         }
 
         /// <summary>
-        /// Creates a new dynamic mock of the specified type(s).
+        /// Creates a new dynamic mock of the specified type using the supplied definition.
         /// </summary>
-        /// <param name="mockedType">The type to mock.</param>
-        /// <param name="mockStyle">Specifies how the mock object should behave when first created.</param>
-        /// <param name="additionalTypesToMock">Any additional types to be mocked. Between this and
-        /// the mockedType parameter, there can be at most one class type specified. All other types
-        /// must be interfaces.</param>
-        /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
-        /// Only applicable when mocking classes with non-default constructors.</param>
-        /// <returns>A named dynamic mock for the specified type(s).</returns>
-        public object NewMock(Type mockedType, MockStyle mockStyle, Type[] additionalTypesToMock, params object[] constructorArgs)
+        /// <typeparam name="TMockedType">The type to mock.</typeparam>
+        /// <param name="definition">An <see cref="IMockDefinition"/> to create the mock from.</param>
+        /// <returns>A dynamic mock for the specified type.</returns>
+        public TMockedType NewMock<TMockedType>(IMockDefinition definition)
         {
-            return this.CreateMockForType(mockedType, null, mockStyle, additionalTypesToMock, constructorArgs);
+            return (TMockedType)definition.Create(typeof(TMockedType), this, this.currentMockObjectFactory);
         }
 
         /// <summary>
         /// Creates a new dynamic mock of the specified type.
         /// </summary>
-        /// <typeparam name="MockedType">The type to mock.</typeparam>
+        /// <typeparam name="TMockedType">The type to mock.</typeparam>
         /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
         /// Only applicable when mocking classes with non-default constructors.</param>
         /// <returns>A dynamic mock for the specified type.</returns>
-        public MockedType NewMock<MockedType>(params object[] constructorArgs)
+        public TMockedType NewMock<TMockedType>(params object[] constructorArgs)
         {
-            return (MockedType)this.CreateMockForType(typeof(MockedType), null, MockStyle.Default, new Type[0], constructorArgs);
+            return this.NewMock<TMockedType>(DefinedAs.WithArgs(constructorArgs));
         }
 
         /// <summary>
         /// Creates a new dynamic mock of the specified type.
         /// </summary>
-        /// <typeparam name="MockedType">The type to mock.</typeparam>
+        /// <typeparam name="TMockedType">The type to mock.</typeparam>
         /// <param name="mockStyle">Specifies how the mock object should behave when first created.</param>
         /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
         /// Only applicable when mocking classes with non-default constructors.</param>
         /// <returns>A dynamic mock for the specified type.</returns>
-        public MockedType NewMock<MockedType>(MockStyle mockStyle, params object[] constructorArgs)
+        public TMockedType NewMock<TMockedType>(MockStyle mockStyle, params object[] constructorArgs)
         {
-            return (MockedType)this.CreateMockForType(typeof(MockedType), null, mockStyle, new Type[0], constructorArgs);
-        }
-
-        /// <summary>
-        /// Creates a new dynamic mock of the specified type(s).
-        /// </summary>
-        /// <typeparam name="MockedType">The type to mock.</typeparam>
-        /// <param name="mockStyle">Specifies how the mock object should behave when first created.</param>
-        /// <param name="additionalTypesToMock">Any additional types to be mocked. Between this and
-        /// the MockedType type parameter, there can be at most one class type specified. All other types
-        /// must be interfaces.</param>
-        /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
-        /// Only applicable when mocking classes with non-default constructors.</param>
-        /// <returns>A dynamic mock for the specified type(s).</returns>
-        public MockedType NewMock<MockedType>(MockStyle mockStyle, Type[] additionalTypesToMock, params object[] constructorArgs)
-        {
-            return (MockedType)this.CreateMockForType(typeof(MockedType), null, mockStyle, additionalTypesToMock, constructorArgs);
+            return this.NewMock<TMockedType>(DefinedAs.OfStyle(mockStyle).WithArgs(constructorArgs));
         }
 
         /// <summary>
@@ -232,7 +230,7 @@ namespace NMock2
         /// <returns>A named mock.</returns>
         public object NewNamedMock(Type mockedType, string name, params object[] constructorArgs)
         {
-            return this.CreateMockForType(mockedType, name, MockStyle.Default, new Type[0], constructorArgs);
+            return this.NewMock(mockedType, DefinedAs.Named(name).WithArgs(constructorArgs));
         }
 
         /// <summary>
@@ -247,71 +245,35 @@ namespace NMock2
         /// <returns>A named mock.</returns>
         public object NewNamedMock(Type mockedType, string name, MockStyle mockStyle, params object[] constructorArgs)
         {
-            return this.CreateMockForType(mockedType, name, mockStyle, new Type[0], constructorArgs);
-        }
-
-        /// <summary>
-        /// Creates a new named dynamic mock of the specified type(s) and allows the style
-        /// of the mock to be specified.
-        /// </summary>
-        /// <param name="mockedType">The type to mock.</param>
-        /// <param name="name">A name for the mock that will be used in error messages.</param>
-        /// <param name="mockStyle">Specifies how the mock object should behave when first created.</param>
-        /// <param name="additionalTypesToMock">Any additional types to be mocked. Between this and
-        /// the mockedType parameter, there can be at most one class type specified. All other types
-        /// must be interfaces.</param>
-        /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
-        /// Only applicable when mocking classes with non-default constructors.</param>
-        /// <returns>A named mock.</returns>
-        public object NewNamedMock(Type mockedType, string name, MockStyle mockStyle, Type[] additionalTypesToMock, params object[] constructorArgs)
-        {
-            return this.CreateMockForType(mockedType, name, mockStyle, additionalTypesToMock, constructorArgs);
+            return this.NewMock(mockedType, DefinedAs.Named(name).OfStyle(mockStyle).WithArgs(constructorArgs));
         }
 
         /// <summary>
         /// Creates a new named dynamic mock of the specified type.
         /// </summary>
-        /// <typeparam name="MockedType">The type to mock.</typeparam>
+        /// <typeparam name="TMockedType">The type to mock.</typeparam>
         /// <param name="name">A name for the mock that will be used in error messages.</param>
         /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
         /// Only applicable when mocking classes with non-default constructors.</param>
         /// <returns>A named mock.</returns>
-        public MockedType NewNamedMock<MockedType>(string name, params object[] constructorArgs)
+        public TMockedType NewNamedMock<TMockedType>(string name, params object[] constructorArgs)
         {
-            return (MockedType)this.CreateMockForType(typeof(MockedType), name, MockStyle.Default, new Type[0], constructorArgs);
+            return this.NewMock<TMockedType>(DefinedAs.Named(name).WithArgs(constructorArgs));
         }
 
         /// <summary>
         /// Creates a new named dynamic mock of the specified type and allows the style
         /// of the mock to be specified.
         /// </summary>
-        /// <typeparam name="MockedType">The type to mock.</typeparam>
+        /// <typeparam name="TMockedType">The type to mock.</typeparam>
         /// <param name="name">A name for the mock that will be used in error messages.</param>
         /// <param name="mockStyle">Specifies how the mock object should behave when first created.</param>
         /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
         /// Only applicable when mocking classes with non-default constructors.</param>
         /// <returns>A named mock.</returns>
-        public MockedType NewNamedMock<MockedType>(string name, MockStyle mockStyle, params object[] constructorArgs)
+        public TMockedType NewNamedMock<TMockedType>(string name, MockStyle mockStyle, params object[] constructorArgs)
         {
-            return (MockedType)this.CreateMockForType(typeof(MockedType), name, mockStyle, new Type[0], constructorArgs);
-        }
-
-        /// <summary>
-        /// Creates a new named dynamic mock of the specified type(s) and allows the style
-        /// of the mock to be specified.
-        /// </summary>
-        /// <typeparam name="MockedType">The type to mock.</typeparam>
-        /// <param name="name">A name for the mock that will be used in error messages.</param>
-        /// <param name="mockStyle">Specifies how the mock object should behave when first created.</param>
-        /// <param name="additionalTypesToMock">Any additional types to be mocked. Between this and
-        /// the MockedType type parameter, there can be at most one class type specified. All other types
-        /// must be interfaces.</param>
-        /// <param name="constructorArgs">The arguments for the constructor of the class to be mocked.
-        /// Only applicable when mocking classes with non-default constructors.</param>
-        /// <returns>A named mock.</returns>
-        public MockedType NewNamedMock<MockedType>(string name, MockStyle mockStyle, Type[] additionalTypesToMock, params object[] constructorArgs)
-        {
-            return (MockedType)this.CreateMockForType(typeof(MockedType), null, mockStyle, additionalTypesToMock, constructorArgs);
+            return this.NewMock<TMockedType>(DefinedAs.Named(name).OfStyle(mockStyle).WithArgs(constructorArgs));
         }
 
         /// <summary>
@@ -328,7 +290,7 @@ namespace NMock2
 
                 throw new ExpectationException(
                     string.Format(
-                        "Rethrown unexpected invocation exception. Stack trace of inner exception:{0}{1}",
+                        "Re-thrown unexpected invocation exception. Stack trace of inner exception:{0}{1}",
                         Environment.NewLine,
                         exceptionToBeRethrown.StackTrace),
                     exceptionToBeRethrown);
@@ -349,19 +311,6 @@ namespace NMock2
         }
 
         /// <summary>
-        /// Adds the expectation.
-        /// </summary>
-        /// <param name="expectation">The expectation.</param>
-        internal void AddExpectation(IExpectation expectation)
-        {
-            this.topOrdering.AddExpectation(expectation);
-        }
-        
-        public delegate object ResolveTypeDelegate(object mock, Type requestedType);
-
-        private ResolveTypeDelegate resolveTypeDelegate;
-
-        /// <summary>
         /// Sets the resolve type handler used to override default values returned by stubs.
         /// </summary>
         /// <param name="resolveTypeHandler">The resolve type handler.</param>
@@ -370,27 +319,88 @@ namespace NMock2
             this.resolveTypeDelegate = resolveTypeHandler;
         }
 
+        /// <summary>
+        /// Sets the mock style used for all properties and methods returning a value of any type of the <paramref name="mock"/>.
+        /// Can be overridden with a type specific mock style with <see cref="SetStubMockStyle{TStub}"/>.
+        /// </summary>
+        /// <param name="mock">The mock (with mock style Stub).</param>
+        /// <param name="nestedMockStyle">The nested mock style.</param>
+        public void SetStubMockStyle(object mock, MockStyle nestedMockStyle)
+        {
+            IMockObject mockObject = CastToMockObject(mock);
+            this.stubMockStyleDictionary[mockObject] = nestedMockStyle;
+        }
+
+        /// <summary>
+        /// Sets the mock style used for all properties and methods returning a value of type <typeparamref name="TStub"/>
+        /// of the <paramref name="mock"/>.
+        /// </summary>
+        /// <typeparam name="TStub">The type of the stub.</typeparam>
+        /// <param name="mock">The mock (with mock style Stub).</param>
+        /// <param name="nestedMockStyle">The nested mock style.</param>
+        public void SetStubMockStyle<TStub>(object mock, MockStyle nestedMockStyle)
+        {
+            this.SetStubMockStyle(mock, typeof(TStub), nestedMockStyle);
+        }
+
+        /// <summary>
+        /// Sets the mock style used for all properties and methods returning a value of type <paramref name="nestedMockType"/>
+        /// of the <paramref name="mock"/>.
+        /// </summary>
+        /// <param name="mock">The mock (with mock style Stub).</param>
+        /// <param name="nestedMockType">Type of the nested mock.</param>
+        /// <param name="nestedMockStyle">The nested mock style.</param>
+        public void SetStubMockStyle(object mock, Type nestedMockType, MockStyle nestedMockStyle)
+        {
+            IMockObject mockObject = CastToMockObject(mock);
+            this.stubMockStyleDictionary[mockObject, nestedMockType] = nestedMockStyle;
+        }
+
+        /// <summary>
+        /// Clears all expectation on the specified mock.
+        /// </summary>
+        /// <param name="mock">The mock for which all expectations are cleared.</param>
+        public void ClearExpectation(object mock)
+        {
+            IMockObject mockObject = CastToMockObject(mock);
+
+            List<IExpectation> result = new List<IExpectation>();
+            this.expectations.QueryExpectationsBelongingTo(mockObject, result);
+
+            result.ForEach(expectation => this.expectations.RemoveExpectation(expectation));
+        }
+
+        /// <summary>
+        /// Adds the expectation.
+        /// </summary>
+        /// <param name="expectation">The expectation.</param>
+        internal void AddExpectation(IExpectation expectation)
+        {
+            this.topOrdering.AddExpectation(expectation);
+        }
+
+        /// <summary>
+        /// Resolves the return value to be used in a call to a mock with stub behavior.
+        /// </summary>
+        /// <param name="mock">The mock on which the call is made.</param>
+        /// <param name="requestedType">The type of the return value.</param>
+        /// <returns>The object to be returned as return value; or <see cref="Missing.Value"/>
+        /// if the default value should be used.</returns>
         internal object ResolveType(object mock, Type requestedType)
         {
             return this.resolveTypeDelegate != null ? this.resolveTypeDelegate(mock, requestedType) : Missing.Value;
         }
 
-        public delegate MockStyle? ResolveMockStyle(object mock, Type requestedType);
-
-        private ResolveMockStyle mockStyleResolver;
-
         /// <summary>
-        /// Sets the mock style resolver used to override the default mock style used when mocks are returned by stubs.
+        /// Gets the mock style to be used for a mock created for a return value of a call to mock with stub behavior.
         /// </summary>
-        /// <param name="resolver">The resolver.</param>
-        public void SetMockStyleResolver(ResolveMockStyle resolver)
-        {
-            this.mockStyleResolver = resolver;
-        }
-
+        /// <param name="mock">The mock that wants to create a mock.</param>
+        /// <param name="requestedType">The type of the requested mock.</param>
+        /// <returns>The mock style to use on the created mock. Null if <see cref="MockStyle.Default"/> has to be used.</returns>
         internal MockStyle? GetDependencyMockStyle(object mock, Type requestedType)
         {
-            return this.mockStyleResolver != null ? this.mockStyleResolver(mock, requestedType) : null;
+            IMockObject mockObject = CastToMockObject(mock);
+            return this.stubMockStyleDictionary[mockObject, requestedType];
         }
         
         /// <summary>
@@ -421,50 +431,27 @@ namespace NMock2
         }
 
         /// <summary>
-        /// Returns the default name for a type that is used to name mocks.
+        /// Casts the argument to <see cref="IMockObject"/>.
         /// </summary>
-        /// <param name="type">The type to get the default name for.</param>
-        /// <returns>Default name for the specified type.</returns>
-        protected virtual string DefaultNameFor(Type type)
+        /// <param name="mock">The object to cast.</param>
+        /// <returns>The argument casted to <see cref="IMockObject"/></returns>
+        /// <throws cref="ArgumentNullException">Thrown if <paramref name="mock"/> is null</throws>
+        /// <throws cref="ArgumentException">Thrown if <paramref name="mock"/> is not a <see cref="IMockObject"/></throws>
+        private static IMockObject CastToMockObject(object mock)
         {
-            string name = type.Name;
-            int firstLower = FirstLowerCaseChar(name);
-
-            return 
-                firstLower == name.Length ? 
-                name.ToLower() : 
-                name.Substring(firstLower - 1, 1).ToLower() + name.Substring(firstLower);
-        }
-
-        /// <summary>
-        /// Finds the first lower case char in the specified string.
-        /// </summary>
-        /// <param name="s">The string to inspect.</param>
-        /// <returns>the first lower case char in the specified string.</returns>
-        private static int FirstLowerCaseChar(string s)
-        {
-            int i = 0;
-            while (i < s.Length && !Char.IsLower(s[i]))
+            if (mock == null)
             {
-                i++;
+                throw new ArgumentNullException("mock", "mock must not be null");
             }
 
-            return i;
-        }
+            IMockObject mockObject = mock as IMockObject;
 
-        /// <summary>
-        /// Checks that interfaces do not contain ToString method declarations.
-        /// </summary>
-        /// <param name="mockedTypes">The types that are to be mocked.</param>
-        private static void CheckInterfacesDoNotContainToStringMethodDeclaration(CompositeType mockedTypes)
-        {
-            foreach (MethodInfo method in mockedTypes.GetMatchingMethods(new MethodNameMatcher("ToString"), false))
+            if (mockObject != null)
             {
-                if (method.ReflectedType.IsInterface && method.GetParameters().Length == 0)
-                {
-                    throw new ArgumentException("Interfaces must not contain a declaration for ToString().");
-                }
+                return mockObject;
             }
+
+            throw new ArgumentException("argument must be a mock", "mock");
         }
 
         /// <summary>
@@ -475,39 +462,6 @@ namespace NMock2
             this.depth = 1;
             this.expectations = new UnorderedExpectations();
             this.topOrdering = this.expectations;
-        }
-
-        /// <summary>
-        /// Creates a new mock for the specified type.
-        /// </summary>
-        /// <param name="mockedType">Type of the mock.</param>
-        /// <param name="name">The name of the mock.</param>
-        /// <param name="mockStyle">The mock style.</param>
-        /// <param name="additionalTypesToMock">Any additional interfaces that should also be mocked.</param>
-        /// <param name="constructorArgs">The constructor arguments.</param>
-        /// <returns>A newly created mock for type</returns>
-        private object CreateMockForType(Type mockedType, string name, MockStyle mockStyle, Type[] additionalTypesToMock, params object[] constructorArgs)
-        {
-            if (name == null)
-            {
-                name = this.DefaultNameFor(mockedType);
-            }
-
-            CompositeType compositeType = new CompositeType(mockedType, additionalTypesToMock);
-
-            if (compositeType.PrimaryType.IsInterface)
-            {
-                if (constructorArgs.Length > 0)
-                {
-                    throw new InvalidOperationException("Cannot specify constructor arguments when mocking an interface");
-                }
-
-                CheckInterfacesDoNotContainToStringMethodDeclaration(compositeType);
-            }
-
-            return this.currentMockObjectFactory.CreateMock(this, compositeType, name, mockStyle, constructorArgs);
-
-            //throw new ArgumentException("Can only mock classes and interfaces", "mockedType"); // TODO: More error checking
         }
 
         /// <summary>
@@ -587,7 +541,7 @@ namespace NMock2
             private readonly Mockery mockery;
 
             /// <summary>
-            /// The previous expectaion ordering.
+            /// The previous expectation ordering.
             /// </summary>
             private readonly IExpectationOrdering previous;
 
@@ -611,4 +565,12 @@ namespace NMock2
             }
         }
     }
+
+    /// <summary>
+    /// Delegate used to override default type returned in stub behavior.
+    /// </summary>
+    /// <param name="mock">The mock that has to return a value.</param>
+    /// <param name="requestedType">Type of the return value.</param>
+    /// <returns>The object to return as return value for the requested type.</returns>
+    public delegate object ResolveTypeDelegate(object mock, Type requestedType);
 }

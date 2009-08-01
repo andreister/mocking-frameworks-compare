@@ -20,6 +20,7 @@ namespace NMock2.Internal
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.IO;
     using NMock2.Matchers;
     using NMock2.Monitoring;
@@ -34,7 +35,7 @@ namespace NMock2.Internal
         private string expectationComment;
         private Matcher requiredCountMatcher, matchingCountMatcher;
         
-        private Matcher receiverMatcher = new AlwaysMatcher(true, "<any object>");
+        private IMockObject receiver;
         private string methodSeparator = ".";
         private Matcher methodMatcher = new AlwaysMatcher(true, "<any method>");
         private Matcher genericMethodTypeMatcher = new AlwaysMatcher(true, string.Empty);
@@ -55,10 +56,10 @@ namespace NMock2.Internal
             this.matchingCountMatcher = matchingCountMatcher;
         }
         
-        public Matcher ReceiverMatcher
+        public IMockObject Receiver
         {
-            get { return this.receiverMatcher; }
-            set { this.receiverMatcher = value; }
+            get { return this.receiver; }
+            set { this.receiver = value; }
         }
         
         public Matcher MethodMatcher
@@ -107,7 +108,7 @@ namespace NMock2.Internal
         public bool Matches(Invocation invocation)
         {
             return this.IsActive
-                && this.receiverMatcher.Matches(invocation.Receiver)
+                && this.receiver == invocation.Receiver
                 && this.methodMatcher.Matches(invocation.Method)
                 && this.argumentsMatcher.Matches(invocation)
                 && this.ExtraMatchersMatch(invocation)
@@ -137,6 +138,20 @@ namespace NMock2.Internal
             if (!this.HasBeenMet)
             {
                 this.DescribeTo(writer);
+            }
+        }
+
+        /// <summary>
+        /// Adds itself to the <paramref name="result"/> if the <see cref="Receiver"/> matches
+        /// the specified <paramref name="mock"/>.
+        /// </summary>
+        /// <param name="mock">The mock for which expectations are queried.</param>
+        /// <param name="result">The result to add matching expectations to.</param>
+        public void QueryExpectationsBelongingTo(IMockObject mock, IList<IExpectation> result)
+        {
+            if (this.Receiver == mock)
+            {
+                result.Add(this);
             }
         }
 
@@ -199,7 +214,7 @@ namespace NMock2.Internal
         {
             writer.Write(this.expectationDescription);
             writer.Write(": ");
-            this.receiverMatcher.DescribeTo(writer);
+            writer.Write(this.receiver.MockName);
             writer.Write(this.methodSeparator);
             this.methodMatcher.DescribeTo(writer);
             this.genericMethodTypeMatcher.DescribeTo(writer);

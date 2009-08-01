@@ -76,17 +76,17 @@ namespace NMock2.Internal
         }
 
         /// <summary>
-        /// Ons the specified receiver.
+        /// Defines the receiver.
         /// </summary>
-        /// <param name="receiver">The receiver.</param>
-        /// <returns></returns>
+        /// <param name="receiver">The dynamic mock on which the expectation or stub is applied.</param>
+        /// <returns>Method syntax defining the method, property or event.</returns>
         public IMethodSyntax On(object receiver)
         {
             if (receiver is IMockObject)
             {
                 this.mockObject = (IMockObject)receiver;
 
-                this.expectation.ReceiverMatcher = new DescriptionOverride(this.mockObject.MockName, Is.Same(receiver));
+                this.expectation.Receiver = this.mockObject;
                 this.mockObject.AddExpectation(this.expectation);
             }
             else
