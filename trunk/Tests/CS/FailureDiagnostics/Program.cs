@@ -30,11 +30,12 @@ namespace FailureDiagnostics
             Console.WriteLine("Press any key to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 3. Some expected method is not invoked - custom message.");
-            Run("Moq      ", moq.CallNeverExpectOnceCustom);
-            Run("Rhino    ", rhino.CallNeverExpectOnceCustom);
-            Run("NMock2   ", nmock2.CallNeverExpectOnceCustom);
-            Run("Isolator ", isolator.CallNeverExpectOnceCustom);
-            Run("Stubs    ", stubs.CallNeverExpectOnceCustom);
+            Run("Moq      ", moq.FailWithCustomMessage);
+            Run("Rhino    ", rhino.FailWithCustomMessage);
+            Run("NMock2   ", nmock2.FailWithCustomMessage);
+            Run("Isolator ", isolator.FailWithCustomMessage);
+            Run("Stubs    ", stubs.FailWithCustomMessage);
+            Console.WriteLine("Press any key to continue..."); Console.ReadLine();
 
             Console.WriteLine("Case 4. Expected method is invoked but parameters were incorrect.");
             Run("Moq      ", moq.CallExpectedWithWrongParameters);
